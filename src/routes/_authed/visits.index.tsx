@@ -1,0 +1,577 @@
+import { PazienteProvider, usePaziente } from '@/providers/paziente';
+import { tablesDB } from '@/utils/appwrite';
+import { createFileRoute, useRouterState } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start';
+import { Query } from 'appwrite';
+import { useEffect, useState } from 'react';
+
+export const getVisits = createServerFn().handler(async ({ data }) => {
+    const { patientId } = data;
+    const query = [];
+    if (patientId) query.push(Query.equal('patient', patientId))
+    return await tablesDB.listRows('69428862001e36e3a748', 'visits', query);
+})
+
+export const createVisit = createServerFn().handler(async ({ data }) => {
+    const {
+        patient,
+        visitDate,
+        reason,
+        note,
+        status,
+    } = data;
+
+    return await tablesDB.createRow('69428862001e36e3a748', 'visits', 'unique()', {
+        patient: patient,
+        visitDate: visitDate,
+        reason: reason,
+        notes: note,
+        status: status
+    })
+})
+
+export const updateVisit = createServerFn().handler(async ({ data }) => {
+    const {
+        $id,
+        patient,
+        visitDate,
+        reason,
+        note,
+        status,
+    } = data;
+
+    return await tablesDB.updateRow('69428862001e36e3a748', 'visits', $id, {
+        patient: patient,
+        visitDate: visitDate,
+        reason: reason,
+        notes: note,
+        status: status
+    })
+})
+
+export const deleteVisit = createServerFn().handler(async ({ data }) => {
+    const {
+        $id,
+    } = data;
+
+    return await tablesDB.deleteRow('69428862001e36e3a748', 'visits', $id)
+})
+
+export const Route = createFileRoute('/_authed/visits/')({
+    component: GestioneVisiteWrapper,
+})
+
+const initialFormState = {
+    $id: null,
+    patient: "",
+    visitDate: "",
+    reason: "",
+    note: "",
+    status: "SCHEDULED",
+};
+
+// Componente modale per le immagini
+// Sostituisci il componente ImmaginiModale con questa versione corretta:
+
+function ImmaginiModale({ isOpen, onClose, visita }) {
+
+    const [loadingImages, setLoadingImages] = useState(true);
+    const [selectedImage, setSelectedImage] = useState(null); // 👈 NUOVO: immagine ingrandita
+
+    // Genera 36 immagini placeholder
+    const immagini = Array.from({ length: 36 }, (_, i) => ({
+        id: i + 1,
+        src: `https://appwrite180.vps.technodesign.it/v1/storage/buckets/693ad49c00126af520a2/files/${visita?.comparisons[i]}/view?project=693952c90020d2e1d87c&mode=admin`,
+        alt: `Immagine ${i + 1} della visita ${visita?.reason || `N/D`}`
+    }));
+
+    useEffect(() => {
+        if (isOpen) {
+            setLoadingImages(false);
+        }
+    }, [isOpen]);
+
+    // 👈 NUOVA FUNZIONE: INGRANDISCE IMMAGINE
+    const handleImageClick = (immagine) => {
+        setSelectedImage(immagine);
+    };
+
+    // 👈 CHIUDE IMMAGINE INGRANDITA
+    const closeImageViewer = () => {
+        setSelectedImage(null);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <>
+            {/* MODALE PRINCIPALE GALLERIA */}
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => {
+                setSelectedImage(null); // Chiude anche immagine ingrandita
+                onClose();
+            }}>
+                <div className="bg-white rounded-3xl shadow-2xl max-w-7xl max-h-[90vh] w-full max-md:w-11/12 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                    {/* Header modale */}
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 pb-4 rounded-t-3xl">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4">
+                                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white mb-1">
+                                        📸 Immagini Visita ({immagini.length})
+                                    </h2>
+                                    <p className="text-white/90 text-sm font-medium">
+                                        {visita?.reason || 'N/D'} - {new Date(visita?.visitDate).toLocaleDateString() || 'N/D'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setSelectedImage(null);
+                                    onClose();
+                                }}
+                                className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
+                            >
+                                <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Contenuto modale */}
+                    <div className="p-8 max-h-[70vh] overflow-y-auto">
+                        {loadingImages ? (
+                            <div className="flex items-center justify-center py-20">
+                                <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
+                                <span className="ml-3 text-lg text-gray-600 font-medium">Caricamento immagini...</span>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                                {immagini.map((immagine) => (
+                                    <div
+                                        key={immagine.id}
+                                        className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-2 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden"
+                                        onClick={() => handleImageClick(immagine)} // 👈 CLICK FUNZIONANTE!
+                                    >
+                                        <div className="w-full h-32 md:h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                            <img
+                                                src={immagine.src}
+                                                alt={immagine.alt}
+                                                className="w-full h-full object-cover rounded-xl shadow-md group-hover:shadow-2xl transition-all duration-300"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-600 font-medium mt-2 text-center truncate px-1">
+                                            Immagine {immagine.id}
+                                        </p>
+                                        {/* Overlay hover FUNZIONALE */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
+                                            <div className="w-full bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl text-center shadow-lg">
+                                                <svg className="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16l5 5m11-1a9 9 0 10-18 0 9 9 0 0018 0z" />
+                                                </svg>
+                                                <span className="text-sm font-semibold text-gray-800">Ingrandisci</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer modale */}
+                    <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
+                        {/* <div className="flex items-center justify-between">
+                            <div className="text-sm text-gray-600">
+                                📊 Totale: <span className="font-semibold text-purple-600">{immagini.length}</span> immagini
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setSelectedImage(null);
+                                    onClose();
+                                }}
+                                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-2xl hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all flex items-center space-x-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Chiudi Galleria</span>
+                            </button>
+                        </div> */}
+                    </div>
+                </div>
+            </div>
+
+            {/* 👈 VIEWER IMMAGINE INGRANDITA */}
+            {selectedImage && (
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={closeImageViewer}>
+                    <div className="max-w-4xl max-h-[90vh] w-full h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        {/* Header viewer */}
+                        <div className="flex items-center justify-between p-6 border-b border-white/20">
+                            <div className="flex items-center space-x-3">
+                                <button
+                                    onClick={closeImageViewer}
+                                    className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
+                                >
+                                    <svg className="w-6 h-6 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <div>
+                                    <p className="text-white text-sm font-medium">Immagine {selectedImage.id}/36</p>
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all cursor-pointer" onClick={closeImageViewer}>
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        {/* Immagine ingrandita */}
+                        <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
+                            <img
+                                src={selectedImage.src}
+                                alt={selectedImage.alt}
+                                className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+function GestioneVisite() {
+    const routerState = useRouterState();
+    const { pazienti, pazienteSelezionato, setPazienteSelezionato } = usePaziente();
+    const [visite, setVisite] = useState([]);
+    const [formData, setFormData] = useState(initialFormState);
+    const [isEditing, setIsEditing] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [soloPazienteSelezionato, setSoloPazienteSelezionato] = useState(false);
+    // 👇 NUOVO STATO PER LA MODALE
+    const [isImmaginiModaleOpen, setIsImmaginiModaleOpen] = useState(false);
+    const [visitaSelezionata, setVisitaSelezionata] = useState(null);
+
+    useEffect(() => {
+        const paziente = routerState.location.state?.paziente;
+
+        if (paziente && pazienti.length > 0) {
+            setPazienteSelezionato(paziente);
+        } else {
+            setPazienteSelezionato(null);
+        }
+    }, [pazienti]);
+
+    useEffect(() => {
+        async function fetchVisits(patientId = '') {
+            const visits = await getVisits({ data: { patientId } });
+            setVisite([...visits.rows]);
+        }
+
+        if (pazienteSelezionato && soloPazienteSelezionato) {
+            fetchVisits(pazienteSelezionato.$id);
+        } else {
+            fetchVisits(); // Tutte le visite
+        }
+    }, [pazienteSelezionato, soloPazienteSelezionato]);
+
+    // Pre-compila form con paziente selezionato
+    useEffect(() => {
+        if (pazienteSelezionato && !isEditing) {
+            setFormData(prev => ({ ...prev, patient: pazienteSelezionato.$id }));
+        }
+    }, [pazienteSelezionato, isEditing]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!formData.patient || !formData.visitDate || !formData.reason) {
+            alert("Paziente, data e motivo obbligatori");
+            return;
+        }
+        setLoading(true);
+        setTimeout(async () => {
+            if (isEditing) {
+                await updateVisit({ data: formData })
+                setVisite(prev => prev.map(v => v.$id === formData.$id ? { ...v, ...formData } : v)); // ✅ Corretto: formData.$id
+            } else {
+                const nuovaVisita = await createVisit({ data: formData })
+                setVisite(prev => [nuovaVisita, ...prev]);
+            }
+            setFormData(initialFormState);
+            setIsEditing(false);
+            setLoading(false);
+        }, 800);
+    };
+
+    const handleEdit = (visita) => {
+        setFormData({ ...visita, visitDate: new Date(visita.visitDate).toISOString().split('T')[0] });
+        setIsEditing(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Elimina questa visita?")) {
+            await deleteVisit({ data: { $id: id } });
+            setVisite(prev => prev.filter(v => v.$id !== id));
+        }
+    };
+
+    // 👇 NUOVA FUNZIONE PER APrire MODALE IMMAGINI
+    const handleOpenImmagini = (visita) => {
+        setVisitaSelezionata(visita);
+        setIsImmaginiModaleOpen(true);
+    };
+
+    const handleCancelEdit = () => {
+        setFormData(initialFormState);
+        setIsEditing(false);
+    };
+
+    // ✅ FILTRAGGIO CORRETTO
+    const filteredVisite = visite.filter(visita => {
+        const matchSearch =
+            !searchTerm ||
+            visita.reason.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            visita.note.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            visita.visitDate.includes(searchTerm);
+
+        const matchPaziente = !soloPazienteSelezionato || visita.patient === pazienteSelezionato?.$id;
+
+        return matchSearch && matchPaziente;
+    });
+
+    const getfirstNamePaziente = (patient) => {
+        const p = pazienti.find(p => p.$id === patient);
+        return p ? `${p.firstName} ${p.lastName}` : `Paziente #${patient}`;
+    };
+
+    const getstatusBadge = (status) => {
+        const classi = {
+            SCHEDULED: "bg-blue-100 text-blue-800",
+            COMPLETED: "bg-green-100 text-green-800",
+            CANCELLED: "bg-red-100 text-red-800"
+        };
+        return classi[status] || "bg-gray-100 text-gray-800";
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="text-center mb-12">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
+                        Gestione Visite
+                    </h1>
+                    {pazienteSelezionato && (
+                        <div className="mb-6 p-4 bg-emerald-100 border border-emerald-200 rounded-2xl max-w-2xl mx-auto">
+                            <p className="text-xl font-semibold text-emerald-800">
+                                👤 {pazienteSelezionato.firstName} {pazienteSelezionato.lastName}
+                            </p>
+                            <p className="text-sm text-emerald-700">CF: {pazienteSelezionato.fiscalCode}</p>
+                        </div>
+                    )}
+                    {pazienteSelezionato && (
+                        <button
+                            onClick={() => setSoloPazienteSelezionato(!soloPazienteSelezionato)}
+                            className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all mx-auto block ${soloPazienteSelezionato
+                                ? "bg-emerald-200 text-emerald-800 hover:bg-emerald-300 shadow-md"
+                                : "bg-blue-100 text-blue-800 hover:bg-blue-200 shadow-sm"
+                                }`}
+                        >
+                            {soloPazienteSelezionato ? "👁️ Mostra tutte le visite" : "✅ Solo visite di questo paziente"}
+                        </button>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* FORM - invariato */}
+                    <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                            <div className="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mr-4">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            {isEditing ? "Modifica Visita" : "Nuova Visita"}
+                        </h2>
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Paziente *</label>
+                                    <select name="patient" value={formData.patient} onChange={handleChange} required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                                        <option value="">Seleziona...</option>
+                                        {pazienti.map(p => (
+                                            <option key={p.$id} value={p.$id}>{p.fiscalCode} - {p.firstName} {p.lastName}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Data *</label>
+                                    <input type="date" name="visitDate" value={formData.visitDate} onChange={handleChange} required
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">status</label>
+                                    <select name="status" value={formData.status} onChange={handleChange}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                                        <option value="SCHEDULED">Programmata</option>
+                                        <option value="COMPLETED">Completata</option>
+                                        <option value="CANCELLED">Annullata</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">reason *</label>
+                                <input type="text" name="reason" value={formData.reason} onChange={handleChange} required
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
+                                <textarea name="note" value={formData.note} onChange={handleChange} rows="3"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500" />
+                            </div>
+                            <div className="flex gap-3">
+                                <button type="submit" disabled={loading}
+                                    className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-emerald-700 disabled:opacity-50 flex items-center justify-center">
+                                    {loading ? "Salvando..." : (isEditing ? "Aggiorna" : "Aggiungi")}
+                                </button>
+                                {isEditing && (
+                                    <button type="button" onClick={handleCancelEdit}
+                                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">
+                                        Annulla
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* LISTA VISITE */}
+                    <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                                <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mr-4">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                Elenco Visite
+                            </h2>
+                            <div className="text-sm font-semibold text-gray-700 bg-emerald-100 px-4 py-2 rounded-xl">
+                                {filteredVisite.length} / {visite.length}
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <div className="relative">
+                                <input type="text" placeholder="Cerca per reason, note o data..." value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 bg-gray-50" />
+                                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        {filteredVisite.length === 0 ? (
+                            <div className="text-center py-16">
+                                <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1">Nessuna visita</h3>
+                                <p className="text-gray-500">Aggiungi la prima visita o modifica i filtri</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gray-50">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Paziente</th>
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Data</th>
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Motivo</th>
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stato</th>
+                                            <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Azioni</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {filteredVisite.map((visita) => (
+                                            <tr key={visita.$id} className="hover:bg-gray-50">
+                                                <td className="px-4 py-4 font-medium text-gray-900">
+                                                    {getfirstNamePaziente(visita.patient)}
+                                                </td>
+                                                <td className="px-4 py-4 text-gray-700">
+                                                    {new Date(visita.visitDate).toLocaleDateString() || '-'}
+                                                </td>
+                                                <td className="px-4 py-4 text-gray-700 max-w-xs truncate" title={visita.reason}>
+                                                    {visita.reason}
+                                                </td>
+                                                <td className="px-4 py-4">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getstatusBadge(visita.status)}`}>
+                                                        {visita.status === 'SCHEDULED' ? '⏰ Program.' :
+                                                            visita.status === 'COMPLETED' ? '✅ Comp.' : '❌ Annull.'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-4 text-right space-x-2">
+                                                    {/* 👇 PULSANTE IMMAGINI AGGIUNTO */}
+                                                    <button
+                                                        onClick={() => handleOpenImmagini(visita)}
+                                                        className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-lg hover:bg-purple-200 flex items-center space-x-1"
+                                                        title="Visualizza immagini"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <span>Immagini</span>
+                                                    </button>
+                                                    <button onClick={() => handleEdit(visita)}
+                                                        className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-lg hover:bg-emerald-200">
+                                                        Modifica
+                                                    </button>
+                                                    <button onClick={() => handleDelete(visita.$id)}
+                                                        className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-lg hover:bg-red-200">
+                                                        Elimina
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        {/* 👇 MODALE IMMAGINI */}
+                        <ImmaginiModale
+                            isOpen={isImmaginiModaleOpen}
+                            onClose={() => setIsImmaginiModaleOpen(false)}
+                            visita={visitaSelezionata}
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function GestioneVisiteWrapper() {
+    return (
+        <PazienteProvider>
+            <GestioneVisite />
+        </PazienteProvider>
+    );
+}
