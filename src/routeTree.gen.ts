@@ -150,13 +150,13 @@ export interface FileRoutesByFullPath {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/documents': typeof AuthedDocumentsIndexRoute
-  '/patients': typeof AuthedPatientsIndexRoute
-  '/visits': typeof AuthedVisitsIndexRoute
+  '/documents/': typeof AuthedDocumentsIndexRoute
+  '/patients/': typeof AuthedPatientsIndexRoute
+  '/visits/': typeof AuthedVisitsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
-  '/demo/start/ssr': typeof DemoStartSsrIndexRoute
+  '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -220,13 +220,13 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/documents'
-    | '/patients'
-    | '/visits'
+    | '/documents/'
+    | '/patients/'
+    | '/visits/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
-    | '/demo/start/ssr'
+    | '/demo/start/ssr/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -307,7 +307,7 @@ declare module '@tanstack/react-router' {
     '/_authed': {
       id: '/_authed'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -356,21 +356,21 @@ declare module '@tanstack/react-router' {
     '/_authed/visits/': {
       id: '/_authed/visits/'
       path: '/visits'
-      fullPath: '/visits'
+      fullPath: '/visits/'
       preLoaderRoute: typeof AuthedVisitsIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/patients/': {
       id: '/_authed/patients/'
       path: '/patients'
-      fullPath: '/patients'
+      fullPath: '/patients/'
       preLoaderRoute: typeof AuthedPatientsIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/documents/': {
       id: '/_authed/documents/'
       path: '/documents'
-      fullPath: '/documents'
+      fullPath: '/documents/'
       preLoaderRoute: typeof AuthedDocumentsIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
@@ -419,7 +419,7 @@ declare module '@tanstack/react-router' {
     '/demo/start/ssr/': {
       id: '/demo/start/ssr/'
       path: '/demo/start/ssr'
-      fullPath: '/demo/start/ssr'
+      fullPath: '/demo/start/ssr/'
       preLoaderRoute: typeof DemoStartSsrIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
