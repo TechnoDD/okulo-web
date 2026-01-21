@@ -13,8 +13,8 @@ import {
 export const client = new Client();
 
 client
-  .setEndpoint("https://appwrite180.vps.technodesign.it/v1")
-  .setProject("693952c90020d2e1d87c"); // Replace with your project ID
+  .setEndpoint("https://api.virtualfactory.it/v1")
+  .setProject("69713052000a9e98a270"); // Replace with your project ID
 
 export const account = new Account(client);
 export const storage = new Storage(client);
