@@ -21,8 +21,7 @@ FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 
 # Copia il server handler da .output
-COPY --from=builder /app/.output/server/index.mjs ./server/index.mjs
-COPY --from=builder /app/.output/server/ ./server/
+COPY --from=builder /app/.output ./output
 COPY --from=builder /app/package.json ./package.json
 
 # Installa solo production deps
