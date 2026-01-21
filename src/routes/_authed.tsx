@@ -4,28 +4,32 @@ import { Outlet, Link, useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
 export const Route = createFileRoute('/_authed')({
-  beforeLoad: async ({ location }) => {
-    try {
-      const user = await account.get()
-      if (!user) {
-        throw redirect({
-          to: '/login',
-          search: { redirect: location.href },
-        })
-      }
-      return { user }
-    }
-    catch (error) {
-      // Re-throw redirects (they're intentional, not errors)
-      if (isRedirect(error)) throw error
+  // beforeLoad: async ({ location }) => {
+  //   try {
+  //     const user = await account.get()
+  //     if (!user) {
+  //       throw redirect({
+  //         to: '/login',
+  //         search: { redirect: location.href },
+  //       })
+  //     }
+  //     return { user }
+  //   }
+  //   catch (error) {
+  //     // Re-throw redirects (they're intentional, not errors)
+  //     if (isRedirect(error)) throw error
 
-      // Auth check failed (network error, etc.) - redirect to login
-      throw redirect({
-        to: '/login',
-        search: { redirect: location.href },
-      })
-    }
+  //     // Auth check failed (network error, etc.) - redirect to login
+  //     throw redirect({
+  //       to: '/login',
+  //       search: { redirect: location.href },
+  //     })
+  //   }
 
+  // },
+  loader: ({ location, context }) => {
+    console.log(location, context)
+    // const userData = context.queryClient.fetchQuery
   },
   component: AuthenticatedLayout
 })
