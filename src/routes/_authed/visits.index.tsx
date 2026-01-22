@@ -81,7 +81,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
     // Genera 36 immagini placeholder
     const immagini = Array.from({ length: 36 }, (_, i) => ({
         id: i + 1,
-        src: `https://appwrite180.vps.technodesign.it/v1/storage/buckets/693ad49c00126af520a2/files/${visita?.comparisons[i]}/view?project=693952c90020d2e1d87c&mode=admin`,
+        src: `https://api.virtualfactory.it/v1/storage/buckets/693ad49c00126af520a2/files/${visita?.comparisons[i]}/view?project=69713052000a9e98a270&mode=admin`,
         alt: `Immagine ${i + 1} della visita ${visita?.reason || `N/D`}`
     }));
 
