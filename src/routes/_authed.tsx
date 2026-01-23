@@ -1,4 +1,5 @@
 import { account } from '@/utils/appwrite'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, redirect, isRedirect } from '@tanstack/react-router'
 import { Outlet, Link, useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
@@ -28,8 +29,11 @@ export const Route = createFileRoute('/_authed')({
 
   // },
   loader: ({ location, context }) => {
-    console.log(location, context)
-    // const userData = context.queryClient.fetchQuery
+    // const user = useQuery({
+    //   queryKey: ['user'], queryFn: () => {
+
+    //   }
+    // })
   },
   component: AuthenticatedLayout
 })

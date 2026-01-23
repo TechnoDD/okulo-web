@@ -1,5 +1,5 @@
 import { PazienteProvider, usePaziente } from '@/providers/paziente';
-import { tablesDB } from '@/utils/appwrite';
+import { storage, tablesDB } from '@/utils/appwrite';
 import { createFileRoute, useRouterState } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start';
 import { Query } from 'appwrite';
@@ -54,6 +54,12 @@ export const deleteVisit = createServerFn().handler(async ({ data }) => {
         $id,
     } = data;
 
+    const { comparisons } = await tablesDB.getRow('69428862001e36e3a748', 'visits', $id, [Query.select(['comparisons'])])
+
+    comparisons.forEach(async fileId => {
+        await storage.deleteFile('693ad49c00126af520a2', fileId)
+    });
+
     return await tablesDB.deleteRow('69428862001e36e3a748', 'visits', $id)
 })
 
@@ -73,17 +79,43 @@ const initialFormState = {
 // Componente modale per le immagini
 // Sostituisci il componente ImmaginiModale con questa versione corretta:
 
+// Componente modale per le immagini - VERSIONE MODIFICATA PER 6 GRUPPI
+// Componente modale per le immagini - VERSIONE CON NOMI GRUPPI PERSONALIZZATI
 function ImmaginiModale({ isOpen, onClose, visita }) {
-
     const [loadingImages, setLoadingImages] = useState(true);
-    const [selectedImage, setSelectedImage] = useState(null); // 👈 NUOVO: immagine ingrandita
+    const [selectedImage, setSelectedImage] = useState(null);
 
-    // Genera 36 immagini placeholder
-    const immagini = Array.from({ length: 36 }, (_, i) => ({
-        id: i + 1,
-        src: `https://api.virtualfactory.it/v1/storage/buckets/693ad49c00126af520a2/files/${visita?.comparisons[i]}/view?project=69713052000a9e98a270&mode=admin`,
-        alt: `Immagine ${i + 1} della visita ${visita?.reason || `N/D`}`
-    }));
+    // Nomi dei 6 gruppi specifici
+    const nomiGruppi = [
+        "Giro completo rosso",
+        "Giro completo verde",
+        "Giro random interno rosso",
+        "Giro random interno verde",
+        "Giro random esterno rosso",
+        "Giro random esterno verde"
+    ];
+
+    // Genera 42 immagini raggruppate in 6 gruppi
+    const gruppiImmagini = [];
+    const numImmagini = 42;
+    const immaginiPerGruppo = 7;
+    const numGruppi = 6;
+
+    for (let gruppoIndex = 0; gruppoIndex < numGruppi; gruppoIndex++) {
+        const immaginiGruppo = [];
+        for (let i = 0; i < immaginiPerGruppo; i++) {
+            const immagineIndex = gruppoIndex * immaginiPerGruppo + i;
+            immaginiGruppo.push({
+                id: immagineIndex + 1,
+                src: `https://api.virtualfactory.it/v1/storage/buckets/693ad49c00126af520a2/files/${visita?.comparisons[immagineIndex]}/view?project=69713052000a9e98a270&mode=admin`,
+                alt: `Immagine ${immagineIndex + 1} - ${nomiGruppi[gruppoIndex]}`
+            });
+        }
+        gruppiImmagini.push({
+            nome: nomiGruppi[gruppoIndex],
+            immagini: immaginiGruppo
+        });
+    }
 
     useEffect(() => {
         if (isOpen) {
@@ -91,12 +123,10 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         }
     }, [isOpen]);
 
-    // 👈 NUOVA FUNZIONE: INGRANDISCE IMMAGINE
     const handleImageClick = (immagine) => {
         setSelectedImage(immagine);
     };
 
-    // 👈 CHIUDE IMMAGINE INGRANDITA
     const closeImageViewer = () => {
         setSelectedImage(null);
     };
@@ -107,7 +137,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         <>
             {/* MODALE PRINCIPALE GALLERIA */}
             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => {
-                setSelectedImage(null); // Chiude anche immagine ingrandita
+                setSelectedImage(null);
                 onClose();
             }}>
                 <div className="bg-white rounded-3xl shadow-2xl max-w-7xl max-h-[90vh] w-full max-md:w-11/12 overflow-hidden" onClick={(e) => e.stopPropagation()}>
@@ -122,7 +152,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                 </div>
                                 <div>
                                     <h2 className="text-2xl font-bold text-white mb-1">
-                                        📸 Immagini Visita ({immagini.length})
+                                        📸 Immagini Visita ({numImmagini} totali)
                                     </h2>
                                     <p className="text-white/90 text-sm font-medium">
                                         {visita?.reason || 'N/D'} - {new Date(visita?.visitDate).toLocaleDateString() || 'N/D'}
@@ -151,32 +181,55 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                 <span className="ml-3 text-lg text-gray-600 font-medium">Caricamento immagini...</span>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                                {immagini.map((immagine) => (
-                                    <div
-                                        key={immagine.id}
-                                        className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-2 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden"
-                                        onClick={() => handleImageClick(immagine)} // 👈 CLICK FUNZIONANTE!
-                                    >
-                                        <div className="w-full h-32 md:h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                            <img
-                                                src={immagine.src}
-                                                alt={immagine.alt}
-                                                className="w-full h-full object-cover rounded-xl shadow-md group-hover:shadow-2xl transition-all duration-300"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                        <p className="text-xs text-gray-600 font-medium mt-2 text-center truncate px-1">
-                                            Immagine {immagine.id}
-                                        </p>
-                                        {/* Overlay hover FUNZIONALE */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
-                                            <div className="w-full bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl text-center shadow-lg">
-                                                <svg className="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16l5 5m11-1a9 9 0 10-18 0 9 9 0 0018 0z" />
-                                                </svg>
-                                                <span className="text-sm font-semibold text-gray-800">Ingrandisci</span>
+                            <div className="space-y-8">
+                                {gruppiImmagini.map((gruppo, gruppoIndex) => (
+                                    <div key={gruppoIndex} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-6 border border-purple-100 shadow-lg">
+                                        {/* Header del gruppo */}
+                                        <div className="flex items-center mb-6 pb-4 border-b border-purple-200">
+                                            <div className="w-12 h-16 bg-gradient-to-r from-red-500 to-green-500 rounded-2xl flex flex-col items-center justify-center mr-4 shadow-lg p-2">
+                                                <span className="text-lg font-bold text-white">{gruppoIndex + 1}</span>
+                                                <span className="text-xs text-white/90 font-medium">di 6</span>
                                             </div>
+                                            <div>
+                                                <h3 className="text-xl font-bold text-gray-900 leading-tight">
+                                                    {gruppo.nome}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 font-medium mt-1">
+                                                    {gruppo.immagini.length} immagini
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Griglia immagini del gruppo */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                                            {gruppo.immagini.map((immagine) => (
+                                                <div
+                                                    key={immagine.id}
+                                                    className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-2 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 hover:border-purple-200"
+                                                    onClick={() => handleImageClick(immagine)}
+                                                >
+                                                    <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                        <img
+                                                            src={immagine.src}
+                                                            alt={immagine.alt}
+                                                            className="w-full h-full object-cover rounded-xl shadow-md group-hover:shadow-2xl transition-all duration-300"
+                                                            loading="lazy"
+                                                        />
+                                                    </div>
+                                                    <p className="text-xs text-gray-600 font-medium mt-2 text-center truncate px-1">
+                                                        #{immagine.id}
+                                                    </p>
+                                                    {/* Overlay hover */}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
+                                                        <div className="w-full bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl text-center shadow-lg">
+                                                            <svg className="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16l5 5m11-1a9 9 0 10-18 0 9 9 0 0018 0z" />
+                                                            </svg>
+                                                            <span className="text-sm font-semibold text-gray-800">Ingrandisci</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 ))}
@@ -186,28 +239,16 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
 
                     {/* Footer modale */}
                     <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
-                        {/* <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600">
-                                📊 Totale: <span className="font-semibold text-purple-600">{immagini.length}</span> immagini
+                                📊 Totale: <span className="font-semibold text-purple-600">{numImmagini}</span> immagini in <span className="font-semibold text-pink-600">{numGruppi}</span> gruppi
                             </div>
-                            <button
-                                onClick={() => {
-                                    setSelectedImage(null);
-                                    onClose();
-                                }}
-                                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-2xl hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all flex items-center space-x-2"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                <span>Chiudi Galleria</span>
-                            </button>
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* 👈 VIEWER IMMAGINE INGRANDITA */}
+            {/* VIEWER IMMAGINE INGRANDITA */}
             {selectedImage && (
                 <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={closeImageViewer}>
                     <div className="max-w-4xl max-h-[90vh] w-full h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
@@ -223,7 +264,12 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                     </svg>
                                 </button>
                                 <div>
-                                    <p className="text-white text-sm font-medium">Immagine {selectedImage.id}/36</p>
+                                    <p className="text-white text-sm font-medium">
+                                        Immagine #{selectedImage.id}/{numImmagini}
+                                    </p>
+                                    <p className="text-white/80 text-xs">
+                                        {nomiGruppi[Math.floor((selectedImage.id - 1) / 7)]}
+                                    </p>
                                 </div>
                             </div>
                             <div className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all cursor-pointer" onClick={closeImageViewer}>
@@ -274,7 +320,15 @@ function GestioneVisite() {
     useEffect(() => {
         async function fetchVisits(patientId = '') {
             const visits = await getVisits({ data: { patientId } });
-            setVisite([...visits.rows]);
+            // 👇 Popola i dati del paziente per tutte le visite
+            const visitsConPaziente = visits.rows.map(visita => {
+                const pazienteTrovato = pazienti.find(p => p.$id === visita.patient);
+                return {
+                    ...visita,
+                    patientData: pazienteTrovato
+                };
+            });
+            setVisite(visitsConPaziente);
         }
 
         if (pazienteSelezionato && soloPazienteSelezionato) {
@@ -282,7 +336,7 @@ function GestioneVisite() {
         } else {
             fetchVisits(); // Tutte le visite
         }
-    }, [pazienteSelezionato, soloPazienteSelezionato]);
+    }, [pazienteSelezionato, soloPazienteSelezionato, pazienti]);
 
     // Pre-compila form con paziente selezionato
     useEffect(() => {
@@ -296,6 +350,27 @@ function GestioneVisite() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     if (!formData.patient || !formData.visitDate || !formData.reason) {
+    //         alert("Paziente, data e motivo obbligatori");
+    //         return;
+    //     }
+    //     setLoading(true);
+    //     setTimeout(async () => {
+    //         if (isEditing) {
+    //             await updateVisit({ data: formData })
+    //             setVisite(prev => prev.map(v => v.$id === formData.$id ? { ...v, ...formData } : v)); // ✅ Corretto: formData.$id
+    //         } else {
+    //             const nuovaVisita = await createVisit({ data: formData })
+    //             setVisite(prev => [nuovaVisita, ...prev]);
+    //         }
+    //         setFormData(initialFormState);
+    //         setIsEditing(false);
+    //         setLoading(false);
+    //     }, 800);
+    // };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.patient || !formData.visitDate || !formData.reason) {
@@ -306,16 +381,23 @@ function GestioneVisite() {
         setTimeout(async () => {
             if (isEditing) {
                 await updateVisit({ data: formData })
-                setVisite(prev => prev.map(v => v.$id === formData.$id ? { ...v, ...formData } : v)); // ✅ Corretto: formData.$id
+                setVisite(prev => prev.map(v => v.$id === formData.$id ? { ...v, ...formData } : v));
             } else {
                 const nuovaVisita = await createVisit({ data: formData })
-                setVisite(prev => [nuovaVisita, ...prev]);
+                // 👇 SOLUZIONE: Aggiungi i dati del paziente alla nuova visita
+                const pazienteTrovato = pazienti.find(p => p.$id === formData.patient);
+                const nuovaVisitaConPaziente = {
+                    ...nuovaVisita,
+                    patientData: pazienteTrovato // 👈 Dati completi del paziente
+                };
+                setVisite(prev => [nuovaVisitaConPaziente, ...prev]);
             }
             setFormData(initialFormState);
             setIsEditing(false);
             setLoading(false);
         }, 800);
     };
+
 
     const handleEdit = (visita) => {
         setFormData({ ...visita, visitDate: new Date(visita.visitDate).toISOString().split('T')[0] });
@@ -353,10 +435,22 @@ function GestioneVisite() {
         return matchSearch && matchPaziente;
     });
 
+    // const getfirstNamePaziente = (patient) => {
+    //     const p = pazienti.find(p => p.$id === patient);
+    //     return p ? `${p.firstName} ${p.lastName}` : `Paziente #${patient}`;
+    // };
+
     const getfirstNamePaziente = (patient) => {
+        // 👇 PRIMA controlla se la visita ha già i dati del paziente
+        if (typeof patient === 'object' && patient.patientData) {
+            return `${patient.patientData.firstName} ${patient.patientData.lastName}`;
+        }
+
+        // 👇 ALTRIMENTI cerca nell'array pazienti
         const p = pazienti.find(p => p.$id === patient);
         return p ? `${p.firstName} ${p.lastName}` : `Paziente #${patient}`;
     };
+
 
     const getstatusBadge = (status) => {
         const classi = {
