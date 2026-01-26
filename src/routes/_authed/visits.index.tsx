@@ -5,12 +5,16 @@ import { createServerFn } from '@tanstack/react-start';
 import { Query } from 'appwrite';
 import { useEffect, useState } from 'react';
 
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+
+
 export const getVisits = createServerFn().handler(async ({ data }) => {
     const { patientId } = data;
     const query = [];
     if (patientId) query.push(Query.equal('patient', patientId))
     return await tablesDB.listRows('69428862001e36e3a748', 'visits', query);
 })
+
 
 export const createVisit = createServerFn().handler(async ({ data }) => {
     const {
@@ -21,6 +25,7 @@ export const createVisit = createServerFn().handler(async ({ data }) => {
         status,
     } = data;
 
+
     return await tablesDB.createRow('69428862001e36e3a748', 'visits', 'unique()', {
         patient: patient,
         visitDate: visitDate,
@@ -29,6 +34,7 @@ export const createVisit = createServerFn().handler(async ({ data }) => {
         status: status
     })
 })
+
 
 export const updateVisit = createServerFn().handler(async ({ data }) => {
     const {
@@ -40,6 +46,7 @@ export const updateVisit = createServerFn().handler(async ({ data }) => {
         status,
     } = data;
 
+
     return await tablesDB.updateRow('69428862001e36e3a748', 'visits', $id, {
         patient: patient,
         visitDate: visitDate,
@@ -49,23 +56,29 @@ export const updateVisit = createServerFn().handler(async ({ data }) => {
     })
 })
 
+
 export const deleteVisit = createServerFn().handler(async ({ data }) => {
     const {
         $id,
     } = data;
 
+
     const { comparisons } = await tablesDB.getRow('69428862001e36e3a748', 'visits', $id, [Query.select(['comparisons'])])
+
 
     comparisons.forEach(async fileId => {
         await storage.deleteFile('693ad49c00126af520a2', fileId)
     });
 
+
     return await tablesDB.deleteRow('69428862001e36e3a748', 'visits', $id)
 })
+
 
 export const Route = createFileRoute('/_authed/visits/')({
     component: GestioneVisiteWrapper,
 })
+
 
 const initialFormState = {
     $id: null,
@@ -76,8 +89,6 @@ const initialFormState = {
     status: "SCHEDULED",
 };
 
-// Componente modale per le immagini
-// Sostituisci il componente ImmaginiModale con questa versione corretta:
 
 // Componente modale per le immagini - VERSIONE MODIFICATA PER 6 GRUPPI
 // Componente modale per le immagini - VERSIONE CON NOMI GRUPPI PERSONALIZZATI
@@ -130,6 +141,118 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
     const closeImageViewer = () => {
         setSelectedImage(null);
     };
+
+    // >>>>>>>>>>>>> Aggiunta: funzione per scaricare il PDF <<<<<<<<<<<<<
+    async function generaPDF() {
+        // Crea PDF A4 Landscape (842 x 595 pt)
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([842, 595]); // A4 Landscape
+
+        // Colori e font
+        const helveticaFont = await pdfDoc.embedFont(
+            StandardFonts.Helvetica,
+        );
+
+        // Carica logo da URL invece che da file input
+        try {
+            const logoResponse = await fetch(selectedImage.src);
+            const logoBytes = await logoResponse.arrayBuffer();
+            const logoImage = await pdfDoc.embedPng(logoBytes);
+
+            const logoScale = 0.0977;
+            const logoWidth = 6144 * logoScale; // ~600pt
+            const logoHeight = 2048 * logoScale; // ~200pt
+
+            const centerX = (842 - logoWidth) / 2;
+            const centerY = 250;
+
+            page.drawImage(logoImage, {
+                x: centerX,
+                y: centerY,
+                width: logoWidth,
+                height: logoHeight,
+            });
+        } catch (e) {
+            console.error('Errore nel caricamento del logo da URL', e);
+        }
+
+        // Titolo
+        page.drawText("SCHEDA MEDICA PAZIENTE", {
+            x: 50,
+            y: 520,
+            size: 24,
+            font: helveticaFont,
+            color: rgb(0, 0.2, 0.6),
+        });
+
+        // Campi dati (sotto immagine)
+        const datiY = 180;
+        const dati = [
+            ["Paziente:", `${visita.patientData.firstName} ${visita.patientData.lastName}`],
+            ["Data Visita:", new Date(visita.visitDate).toLocaleDateString("it-IT")],
+            ["Motivazione:", visita.reason],
+            ["Note:", visita.notes || "Nessuna nota"],
+        ];
+
+        dati.forEach(([label, valore], index) => {
+            // Label
+            page.drawText(label, {
+                x: 50,
+                y: datiY - index * 40,
+                size: 14,
+                font: helveticaFont,
+                color: rgb(0.3, 0.3, 0.3),
+            });
+
+            // Valore (allineato a destra)
+            const valoreWidth = helveticaFont.widthOfTextAtSize(valore, 14);
+            page.drawText(valore, {
+                x: 750 - valoreWidth,
+                y: datiY - index * 40,
+                size: 14,
+                font: helveticaFont,
+                color: rgb(0, 0, 0),
+            });
+        });
+
+        // Linee decorative
+        page.drawLine({
+            start: { x: 50, y: 505 },
+            end: { x: 792, y: 505 },
+            thickness: 1,
+            color: rgb(0.8, 0.8, 0.8),
+        });
+
+        // Data e ora documento (ALLONTANATO dal campo Note)
+        const ora = new Date().toLocaleString("it-IT");
+        page.drawText(`Generato: ${ora}`, {
+            x: 50,
+            y: 35, // SPALATO da 50 a 35 (+15pt di spazio)
+            size: 10,
+            font: helveticaFont,
+            color: rgb(0.5, 0.5, 0.5),
+        });
+
+        // Download
+        const pdfBytes = await pdfDoc.save();
+        downloadPDF(
+            pdfBytes,
+            `scheda_paziente_${visita.patientData.firstName}-${visita.patientData.lastName}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}.pdf`,
+        );
+    }
+
+    function downloadPDF(pdfBytes, filename) {
+        const blob = new Blob([pdfBytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    // >>>>>>>>>>>>> FINE AGGIUNTA <<<<<<<<<<<<<
 
     if (!isOpen) return null;
 
@@ -272,11 +395,42 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                     </p>
                                 </div>
                             </div>
-                            <div className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all cursor-pointer" onClick={closeImageViewer}>
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+
+                            {/* >>>>>>>>>>>>> Header: bottone Download PDF + X <<<<<<<<<<<<< */}
+                            <div className="flex items-center space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={generaPDF}
+                                    className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
+                                    title="Scarica PDF"
+                                >
+                                    <svg
+                                        className="w-6 h-6 text-white group-hover:scale-110 transition-transform"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4"
+                                        />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={closeImageViewer}
+                                    className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all cursor-pointer"
+                                    title="Chiudi"
+                                >
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
+                            {/* >>>>>>>>>>>>> FINE AGGIUNTA HEADER <<<<<<<<<<<<< */}
                         </div>
 
                         {/* Immagine ingrandita */}
@@ -294,6 +448,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
     );
 }
 
+
 function GestioneVisite() {
     const routerState = useRouterState();
     const { pazienti, pazienteSelezionato, setPazienteSelezionato } = usePaziente();
@@ -303,7 +458,6 @@ function GestioneVisite() {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [soloPazienteSelezionato, setSoloPazienteSelezionato] = useState(false);
-    // 👇 NUOVO STATO PER LA MODALE
     const [isImmaginiModaleOpen, setIsImmaginiModaleOpen] = useState(false);
     const [visitaSelezionata, setVisitaSelezionata] = useState(null);
 
@@ -320,7 +474,6 @@ function GestioneVisite() {
     useEffect(() => {
         async function fetchVisits(patientId = '') {
             const visits = await getVisits({ data: { patientId } });
-            // 👇 Popola i dati del paziente per tutte le visite
             const visitsConPaziente = visits.rows.map(visita => {
                 const pazienteTrovato = pazienti.find(p => p.$id === visita.patient);
                 return {
@@ -334,11 +487,10 @@ function GestioneVisite() {
         if (pazienteSelezionato && soloPazienteSelezionato) {
             fetchVisits(pazienteSelezionato.$id);
         } else {
-            fetchVisits(); // Tutte le visite
+            fetchVisits();
         }
     }, [pazienteSelezionato, soloPazienteSelezionato, pazienti]);
 
-    // Pre-compila form con paziente selezionato
     useEffect(() => {
         if (pazienteSelezionato && !isEditing) {
             setFormData(prev => ({ ...prev, patient: pazienteSelezionato.$id }));
@@ -349,27 +501,6 @@ function GestioneVisite() {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
-
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     if (!formData.patient || !formData.visitDate || !formData.reason) {
-    //         alert("Paziente, data e motivo obbligatori");
-    //         return;
-    //     }
-    //     setLoading(true);
-    //     setTimeout(async () => {
-    //         if (isEditing) {
-    //             await updateVisit({ data: formData })
-    //             setVisite(prev => prev.map(v => v.$id === formData.$id ? { ...v, ...formData } : v)); // ✅ Corretto: formData.$id
-    //         } else {
-    //             const nuovaVisita = await createVisit({ data: formData })
-    //             setVisite(prev => [nuovaVisita, ...prev]);
-    //         }
-    //         setFormData(initialFormState);
-    //         setIsEditing(false);
-    //         setLoading(false);
-    //     }, 800);
-    // };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -384,11 +515,10 @@ function GestioneVisite() {
                 setVisite(prev => prev.map(v => v.$id === formData.$id ? { ...v, ...formData } : v));
             } else {
                 const nuovaVisita = await createVisit({ data: formData })
-                // 👇 SOLUZIONE: Aggiungi i dati del paziente alla nuova visita
                 const pazienteTrovato = pazienti.find(p => p.$id === formData.patient);
                 const nuovaVisitaConPaziente = {
                     ...nuovaVisita,
-                    patientData: pazienteTrovato // 👈 Dati completi del paziente
+                    patientData: pazienteTrovato
                 };
                 setVisite(prev => [nuovaVisitaConPaziente, ...prev]);
             }
@@ -397,7 +527,6 @@ function GestioneVisite() {
             setLoading(false);
         }, 800);
     };
-
 
     const handleEdit = (visita) => {
         setFormData({ ...visita, visitDate: new Date(visita.visitDate).toISOString().split('T')[0] });
@@ -411,7 +540,6 @@ function GestioneVisite() {
         }
     };
 
-    // 👇 NUOVA FUNZIONE PER APrire MODALE IMMAGINI
     const handleOpenImmagini = (visita) => {
         setVisitaSelezionata(visita);
         setIsImmaginiModaleOpen(true);
@@ -422,7 +550,6 @@ function GestioneVisite() {
         setIsEditing(false);
     };
 
-    // ✅ FILTRAGGIO CORRETTO
     const filteredVisite = visite.filter(visita => {
         const matchSearch =
             !searchTerm ||
@@ -435,22 +562,14 @@ function GestioneVisite() {
         return matchSearch && matchPaziente;
     });
 
-    // const getfirstNamePaziente = (patient) => {
-    //     const p = pazienti.find(p => p.$id === patient);
-    //     return p ? `${p.firstName} ${p.lastName}` : `Paziente #${patient}`;
-    // };
-
     const getfirstNamePaziente = (patient) => {
-        // 👇 PRIMA controlla se la visita ha già i dati del paziente
         if (typeof patient === 'object' && patient.patientData) {
             return `${patient.patientData.firstName} ${patient.patientData.lastName}`;
         }
 
-        // 👇 ALTRIMENTI cerca nell'array pazienti
         const p = pazienti.find(p => p.$id === patient);
         return p ? `${p.firstName} ${p.lastName}` : `Paziente #${patient}`;
     };
-
 
     const getstatusBadge = (status) => {
         const classi = {
@@ -491,7 +610,7 @@ function GestioneVisite() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* FORM - invariato */}
+                    {/* FORM */}
                     <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
                         <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
                             <div className="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mr-4">
@@ -622,7 +741,6 @@ function GestioneVisite() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-4 text-right space-x-2">
-                                                    {/* 👇 PULSANTE IMMAGINI AGGIUNTO */}
                                                     <button
                                                         onClick={() => handleOpenImmagini(visita)}
                                                         className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-lg hover:bg-purple-200 flex items-center space-x-1"
@@ -649,7 +767,6 @@ function GestioneVisite() {
                             </div>
                         )}
 
-                        {/* 👇 MODALE IMMAGINI */}
                         <ImmaginiModale
                             isOpen={isImmaginiModaleOpen}
                             onClose={() => setIsImmaginiModaleOpen(false)}
@@ -661,6 +778,7 @@ function GestioneVisite() {
         </div>
     );
 }
+
 
 export default function GestioneVisiteWrapper() {
     return (
