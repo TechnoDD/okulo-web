@@ -2,15 +2,15 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Outlet, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authed')({
-  beforeLoad: async ({ context }) => {
-    try {
-      const { getUser } = context.authentication;
-      const user = await getUser();
-      return { user }
-    } catch (err) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  // beforeLoad: async ({ context }) => {
+  //   try {
+  //     const { getUser } = context.authentication;
+  //     const user = await getUser();
+  //     return { user }
+  //   } catch (err) {
+  //     throw redirect({ to: "/login" });
+  //   }
+  // },
   component: AuthenticatedLayout
 })
 

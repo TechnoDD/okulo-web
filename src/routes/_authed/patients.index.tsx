@@ -295,15 +295,13 @@ function GestionePazienti() {
                 </div>
               </div>
 
-              {/* Patologie - Campi Dinamici */}
+              {/* Patologie - Campi Dinamici con Select */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-4">Patologie</label>
                 <div className="space-y-3 max-w-2xl">
                   {formData.pathologies && formData.pathologies.map((pathology, index) => (
                     <div key={index} className="flex items-end gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                      <input
-                        type="text"
-                        placeholder={`Patologia ${index + 1}`}
+                      <select
                         value={pathology || ''}
                         onChange={(e) => {
                           const newPathologies = [...formData.pathologies];
@@ -311,7 +309,13 @@ function GestionePazienti() {
                           setFormData({ ...formData, pathologies: newPathologies });
                         }}
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                      />
+                      >
+                        <option value="">Seleziona una patologia...</option>
+                        <option value="Ipertensione">Ipertensione</option>
+                        <option value="Diabete tipo 2">Diabete tipo 2</option>
+                        <option value="Allergia penicillina">Allergia penicillina</option>
+                        <option value="Asma bronchiale">Asma bronchiale</option>
+                      </select>
                       <button
                         type="button"
                         onClick={() => {

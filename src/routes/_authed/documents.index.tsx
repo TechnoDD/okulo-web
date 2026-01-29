@@ -338,7 +338,7 @@ function GestioneDocumenti() {
                     <option value="">Seleziona...</option>
                     {pazienti.map(p => (
                       <option key={p.$id} value={p.$id}>
-                        #{p.$id} {p.firstName} {p.lastName}
+                        #{p.$id.toString().toUpperCase()} - {p.firstName} {p.lastName}
                       </option>
                     ))}
                   </select>

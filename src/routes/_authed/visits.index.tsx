@@ -662,7 +662,7 @@ function GestioneVisite() {
                                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
                                         <option value="">Seleziona...</option>
                                         {pazienti.map(p => (
-                                            <option key={p.$id} value={p.$id}>{p.fiscalCode} - {p.firstName} {p.lastName}</option>
+                                            <option key={p.$id} value={p.$id}>#{p.$id.toString().toUpperCase()} - {p.firstName} {p.lastName}</option>
                                         ))}
                                     </select>
                                 </div>
