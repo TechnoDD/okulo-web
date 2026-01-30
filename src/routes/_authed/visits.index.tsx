@@ -79,406 +79,6 @@ const initialFormState = {
     status: "SCHEDULED",
 };
 
-
-// function ImmaginiModale({ isOpen, onClose, visita }) {
-//     const [loadingImages, setLoadingImages] = useState(true);
-//     const [selectedImage, setSelectedImage] = useState(null);
-
-//     // Nomi dei 6 gruppi specifici
-//     const nomiGruppi = [
-//         "Giro completo rosso",
-//         "Giro completo verde",
-//         "Giro random interno rosso",
-//         "Giro random interno verde",
-//         "Giro random esterno rosso",
-//         "Giro random esterno verde"
-//     ];
-
-//     // Genera 42 immagini raggruppate in 6 gruppi
-//     const gruppiImmagini = [];
-//     const numImmagini = 42;
-//     const immaginiPerGruppo = 7;
-//     const numGruppi = 6;
-
-//     for (let gruppoIndex = 0; gruppoIndex < numGruppi; gruppoIndex++) {
-//         const immaginiGruppo = [];
-//         for (let i = 0; i < immaginiPerGruppo; i++) {
-//             const immagineIndex = gruppoIndex * immaginiPerGruppo + i;
-//             immaginiGruppo.push({
-//                 id: immagineIndex + 1,
-//                 src: `${import.meta.env.VITE_APPWRITE_ENDPOINT}/storage/buckets/${import.meta.env.VITE_APPWRITE_BUCKET_ID}/files/${visita?.comparisons[immagineIndex]}/view?project=${import.meta.env.VITE_APPWRITE_PROJECT_ID}&mode=admin`,
-//                 alt: `Immagine ${immagineIndex + 1} - ${nomiGruppi[gruppoIndex]}`
-//             });
-//         }
-//         gruppiImmagini.push({
-//             nome: nomiGruppi[gruppoIndex],
-//             immagini: immaginiGruppo
-//         });
-//     }
-
-//     useEffect(() => {
-//         if (isOpen) {
-//             setLoadingImages(false);
-//         }
-//     }, [isOpen]);
-
-//     const handleImageClick = (immagine) => {
-//         setSelectedImage(immagine);
-//     };
-
-//     const closeImageViewer = () => {
-//         setSelectedImage(null);
-//     };
-
-//     async function generaPDF() {
-//         // Crea PDF A4 Landscape (842 x 595 pt)
-//         const pdfDoc = await PDFDocument.create();
-//         const page = pdfDoc.addPage([842, 595]); // A4 Landscape
-
-//         // Colori e font
-//         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-//         // === SEZIONE LOGO CON PORZIONE SPECIFICA ===
-//         const cropX = 2048;      // Pixel da saltare orizzontalmente
-//         const cropY = 0;      // Pixel da saltare verticalmente
-//         const cropWidth = 2048; // Larghezza porzione da estrarre
-//         const cropHeight = 2048; // Altezza porzione da estrarre
-
-//         try {
-//             // 1. Carica immagine completa da URL
-//             const logoResponse = await fetch(selectedImage.src);
-//             const logoBytes = await logoResponse.arrayBuffer();
-
-//             // 2. Crea immagine DOM per dimensioni originali
-//             const img = new Image();
-//             img.crossOrigin = 'anonymous';
-//             img.src = selectedImage.src;
-
-//             await new Promise((resolve, reject) => {
-//                 img.onload = () => resolve();
-//                 img.onerror = () => reject(new Error('Errore caricamento immagine'));
-//             });
-
-//             // 3. ESTRAI PORZIONE con Canvas (senza visualizzarla)
-//             const canvas = document.createElement('canvas');
-//             canvas.width = cropWidth;
-//             canvas.height = cropHeight;
-//             const ctx = canvas.getContext('2d');
-
-//             // drawImage(img, xOrig, yOrig, wOrig, hOrig, xDest, yDest, wDest, hDest)
-//             ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-
-//             // 4. Canvas → PNG → Uint8Array per pdf-lib
-//             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-//             const croppedBytes = await blob.arrayBuffer();
-//             const logoImage = await pdfDoc.embedPng(new Uint8Array(croppedBytes));
-
-//             // 5. Posiziona porzione estratta (usa dimensioni della porzione)
-//             const logoScale = 0.0977;  // Mantieni scala originale o adatta
-//             const logoWidth = cropWidth * logoScale;
-//             const logoHeight = cropHeight * logoScale;
-
-//             const centerX = (842 - logoWidth) / 2;
-//             const centerY = 250;
-
-//             page.drawImage(logoImage, {
-//                 x: centerX,
-//                 y: centerY,
-//                 width: logoWidth,
-//                 height: logoHeight,
-//             });
-
-//         } catch (e) {
-//             console.error('Errore nel caricamento/estrazione porzione logo:', e);
-//             // Fallback: usa immagine completa se fallisce
-//             try {
-//                 const logoImage = await pdfDoc.embedPng(new Uint8Array(logoBytes));
-//                 const logoWidth = 6144 * 0.0977;
-//                 const logoHeight = 2048 * 0.0977;
-//                 const centerX = (842 - logoWidth) / 2;
-//                 page.drawImage(logoImage, {
-//                     x: centerX,
-//                     y: centerY,
-//                     width: logoWidth,
-//                     height: logoHeight,
-//                 });
-//             } catch (e2) {
-//                 console.error('Fallback logo fallito:', e2);
-//             }
-//         }
-
-//         // === TITOLO ===
-//         page.drawText("SCHEDA MEDICA PAZIENTE", {
-//             x: 50,
-//             y: 520,
-//             size: 24,
-//             font: helveticaFont,
-//             color: rgb(0, 0.2, 0.6),
-//         });
-
-//         // === CAMPi DATI (sotto immagine) ===
-//         const datiY = 180;
-//         const dati = [
-//             ["Paziente:", `${visita.patientData.firstName} ${visita.patientData.lastName}`],
-//             ["Data Visita:", new Date(visita.visitDate).toLocaleDateString("it-IT")],
-//             ["Motivazione:", visita.reason],
-//             ["Note:", visita.notes || "Nessuna nota"],
-//         ];
-
-//         dati.forEach(([label, valore], index) => {
-//             // Label sinistra
-//             page.drawText(label, {
-//                 x: 50,
-//                 y: datiY - index * 40,
-//                 size: 14,
-//                 font: helveticaFont,
-//                 color: rgb(0.3, 0.3, 0.3),
-//             });
-
-//             // Valore destra
-//             const valoreWidth = helveticaFont.widthOfTextAtSize(valore, 14);
-//             page.drawText(valore, {
-//                 x: 750 - valoreWidth,
-//                 y: datiY - index * 40,
-//                 size: 14,
-//                 font: helveticaFont,
-//                 color: rgb(0, 0, 0),
-//             });
-//         });
-
-//         // === LINEE DECORATIVE ===
-//         page.drawLine({
-//             start: { x: 50, y: 505 },
-//             end: { x: 792, y: 505 },
-//             thickness: 1,
-//             color: rgb(0.8, 0.8, 0.8),
-//         });
-
-//         // === DATA/ORA DOCUMENTO ===
-//         const ora = new Date().toLocaleString("it-IT");
-//         page.drawText(`Generato: ${ora}`, {
-//             x: 50,
-//             y: 35,
-//             size: 10,
-//             font: helveticaFont,
-//             color: rgb(0.5, 0.5, 0.5),
-//         });
-
-//         // === DOWNLOAD ===
-//         const pdfBytes = await pdfDoc.save();
-//         downloadPDF(
-//             pdfBytes,
-//             `scheda_paziente_${visita.patientData.firstName}-${visita.patientData.lastName}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}.pdf`,
-//         );
-//     }
-
-//     function downloadPDF(pdfBytes, filename) {
-//         const blob = new Blob([pdfBytes], { type: "application/pdf" });
-//         const url = URL.createObjectURL(blob);
-//         const link = document.createElement("a");
-//         link.href = url;
-//         link.download = filename;
-//         document.body.appendChild(link);
-//         link.click();
-//         document.body.removeChild(link);
-//         URL.revokeObjectURL(url);
-//     }
-//     // >>>>>>>>>>>>> FINE AGGIUNTA <<<<<<<<<<<<<
-
-//     if (!isOpen) return null;
-
-//     return (
-//         <>
-//             {/* MODALE PRINCIPALE GALLERIA */}
-//             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => {
-//                 setSelectedImage(null);
-//                 onClose();
-//             }}>
-//                 <div className="bg-white rounded-3xl shadow-2xl max-w-7xl max-h-[90vh] w-full max-md:w-11/12 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-//                     {/* Header modale */}
-//                     <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 pb-4 rounded-t-3xl">
-//                         <div className="flex items-center justify-between">
-//                             <div className="flex items-center">
-//                                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4">
-//                                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-//                                     </svg>
-//                                 </div>
-//                                 <div>
-//                                     <h2 className="text-2xl font-bold text-white mb-1">
-//                                         📸 Immagini Visita ({numImmagini} totali)
-//                                     </h2>
-//                                     <p className="text-white/90 text-sm font-medium">
-//                                         {visita?.reason || 'N/D'} - {new Date(visita?.visitDate).toLocaleDateString() || 'N/D'}
-//                                     </p>
-//                                 </div>
-//                             </div>
-//                             <button
-//                                 onClick={() => {
-//                                     setSelectedImage(null);
-//                                     onClose();
-//                                 }}
-//                                 className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
-//                             >
-//                                 <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-//                                 </svg>
-//                             </button>
-//                         </div>
-//                     </div>
-
-//                     {/* Contenuto modale */}
-//                     <div className="p-8 max-h-[70vh] overflow-y-auto">
-//                         {loadingImages ? (
-//                             <div className="flex items-center justify-center py-20">
-//                                 <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
-//                                 <span className="ml-3 text-lg text-gray-600 font-medium">Caricamento immagini...</span>
-//                             </div>
-//                         ) : (
-//                             <div className="space-y-8">
-//                                 {gruppiImmagini.map((gruppo, gruppoIndex) => (
-//                                     <div key={gruppoIndex} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-6 border border-purple-100 shadow-lg">
-//                                         {/* Header del gruppo */}
-//                                         <div className="flex items-center mb-6 pb-4 border-b border-purple-200">
-//                                             <div className="w-12 h-16 bg-gradient-to-r from-red-500 to-green-500 rounded-2xl flex flex-col items-center justify-center mr-4 shadow-lg p-2">
-//                                                 <span className="text-lg font-bold text-white">{gruppoIndex + 1}</span>
-//                                                 <span className="text-xs text-white/90 font-medium">di 6</span>
-//                                             </div>
-//                                             <div>
-//                                                 <h3 className="text-xl font-bold text-gray-900 leading-tight">
-//                                                     {gruppo.nome}
-//                                                 </h3>
-//                                                 <p className="text-sm text-gray-600 font-medium mt-1">
-//                                                     {gruppo.immagini.length} immagini
-//                                                 </p>
-//                                             </div>
-//                                         </div>
-
-//                                         {/* Griglia immagini del gruppo */}
-//                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-//                                             {gruppo.immagini.map((immagine) => (
-//                                                 <div
-//                                                     key={immagine.id}
-//                                                     className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-2 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 hover:border-purple-200"
-//                                                     onClick={() => handleImageClick(immagine)}
-//                                                 >
-//                                                     <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-//                                                         <img
-//                                                             src={immagine.src}
-//                                                             alt={immagine.alt}
-//                                                             className="w-full h-full object-cover rounded-xl shadow-md group-hover:shadow-2xl transition-all duration-300"
-//                                                             loading="lazy"
-//                                                         />
-//                                                     </div>
-//                                                     <p className="text-xs text-gray-600 font-medium mt-2 text-center truncate px-1">
-//                                                         #{immagine.id}
-//                                                     </p>
-//                                                     {/* Overlay hover */}
-//                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
-//                                                         <div className="w-full bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl text-center shadow-lg">
-//                                                             <svg className="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16l5 5m11-1a9 9 0 10-18 0 9 9 0 0018 0z" />
-//                                                             </svg>
-//                                                             <span className="text-sm font-semibold text-gray-800">Ingrandisci</span>
-//                                                         </div>
-//                                                     </div>
-//                                                 </div>
-//                                             ))}
-//                                         </div>
-//                                     </div>
-//                                 ))}
-//                             </div>
-//                         )}
-//                     </div>
-
-//                     {/* Footer modale */}
-//                     <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
-//                         <div className="flex items-center justify-between">
-//                             <div className="text-sm text-gray-600">
-//                                 📊 Totale: <span className="font-semibold text-purple-600">{numImmagini}</span> immagini in <span className="font-semibold text-pink-600">{numGruppi}</span> gruppi
-//                             </div>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-
-//             {/* VIEWER IMMAGINE INGRANDITA */}
-//             {selectedImage && (
-//                 <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={closeImageViewer}>
-//                     <div className="max-w-4xl max-h-[90vh] w-full h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
-//                         {/* Header viewer */}
-//                         <div className="flex items-center justify-between p-6 border-b border-white/20">
-//                             <div className="flex items-center space-x-3">
-//                                 <button
-//                                     onClick={closeImageViewer}
-//                                     className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
-//                                 >
-//                                     <svg className="w-6 h-6 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-//                                     </svg>
-//                                 </button>
-//                                 <div>
-//                                     <p className="text-white text-sm font-medium">
-//                                         Immagine #{selectedImage.id}/{numImmagini}
-//                                     </p>
-//                                     <p className="text-white/80 text-xs">
-//                                         {nomiGruppi[Math.floor((selectedImage.id - 1) / 7)]}
-//                                     </p>
-//                                 </div>
-//                             </div>
-
-//                             {/* >>>>>>>>>>>>> Header: bottone Download PDF + X <<<<<<<<<<<<< */}
-//                             <div className="flex items-center space-x-3">
-//                                 <button
-//                                     type="button"
-//                                     onClick={generaPDF}
-//                                     className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
-//                                     title="Scarica PDF"
-//                                 >
-//                                     <svg
-//                                         className="w-6 h-6 text-white group-hover:scale-110 transition-transform"
-//                                         fill="none"
-//                                         stroke="currentColor"
-//                                         viewBox="0 0 24 24"
-//                                     >
-//                                         <path
-//                                             strokeLinecap="round"
-//                                             strokeLinejoin="round"
-//                                             strokeWidth={2}
-//                                             d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4"
-//                                         />
-//                                     </svg>
-//                                 </button>
-
-//                                 <button
-//                                     type="button"
-//                                     onClick={closeImageViewer}
-//                                     className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all cursor-pointer"
-//                                     title="Chiudi"
-//                                 >
-//                                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-//                                     </svg>
-//                                 </button>
-//                             </div>
-//                             {/* >>>>>>>>>>>>> FINE AGGIUNTA HEADER <<<<<<<<<<<<< */}
-//                         </div>
-
-//                         {/* Immagine ingrandita */}
-//                         <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
-//                             <img
-//                                 src={selectedImage.src}
-//                                 alt={selectedImage.alt}
-//                                 className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
-//                             />
-//                         </div>
-//                     </div>
-//                 </div>
-//             )}
-//         </>
-//     );
-// }
-
 function ImmaginiModale({ isOpen, onClose, visita }) {
     const [loadingImages, setLoadingImages] = useState(true);
     const [selectedPair, setSelectedPair] = useState(null);
@@ -550,82 +150,152 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         setSelectedPair(null);
     };
 
-    async function generaPDF() {
+    async function generaPDF(anonymous = false) {
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage([842, 595]);
         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+        const imgSize = 340;
+        const centerX = (842 - (imgSize * 2 + 40)) / 2;
+        const imgY = 150;
+
+        // COLONNE abbassate per le immagini più grandi
+        const datiY = 100;
+        const col1X = 50;
+        const col2X = 420;
+        const labelOffset = 140;
+
+        const datiSinistra = [
+            ["Paziente:", anonymous ? `${visita.patient || ""}`.trim().toUpperCase() : `${visita.patientData?.firstName || ""} ${visita.patientData?.lastName || ""}`.trim()],
+            ["Sesso:", visita.patientData?.gender || "N/D"],
+            ["Età:", visita.patientData?.age || "N/D"],
+            ["Data Visita:", visita.visitDate ? new Date(visita.visitDate).toLocaleDateString("it-IT") : "N/D"],
+            ["Motivazione:", visita.reason || "N/D"],
+        ];
+
+        const datiDestra = [
+            ["Patologie:", visita.patientData?.pathologies || "Nessuna"],
+            ["Note:", visita.notes || "Nessuna nota"],
+        ];
+
+        // Process both images
+        const [img1Data, img2Data] = await Promise.all([
+            processImageForPDF(selectedPair.img1Src, pdfDoc),
+            processImageForPDF(selectedPair.img2Src, pdfDoc)
+        ]);
+
+        // ETICHETTE SOPRA (adattate alla nuova dimensione)
+        page.drawText("O. S.", {
+            x: centerX + (imgSize - 40) / 2,
+            y: 500,
+            size: 16,
+            font: helveticaBoldFont,
+            color: rgb(0, 0.6, 0)
+        });
+        page.drawText("O. D.", {
+            x: centerX + imgSize + 40 + (imgSize - 40) / 2,
+            y: 500,
+            size: 16,
+            font: helveticaBoldFont,
+            color: rgb(0, 0.6, 0)
+        });
+
+        // Immagini più grandi (20% più grandi)
+        page.drawImage(img1Data.image, { x: centerX, y: imgY, width: imgSize, height: imgSize });
+        page.drawImage(img2Data.image, { x: centerX + imgSize + 40, y: imgY, width: imgSize, height: imgSize });
+
+        // ETICHETTE IN BASSO (adattate)
+        const label1Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. S.", 11);
+        const label2Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. D.", 11);
+        page.drawText("Verde davanti all'O. S.", {
+            x: centerX + (imgSize - label1Width) / 2,
+            y: imgY - 25,
+            size: 11,
+            font: helveticaFont,
+            color: rgb(0.2, 0.2, 0.6)
+        });
+        page.drawText("Verde davanti all'O. D.", {
+            x: centerX + imgSize + 40 + (imgSize - label2Width) / 2,
+            y: imgY - 25,
+            size: 11,
+            font: helveticaFont,
+            color: rgb(0.2, 0.2, 0.6)
+        });
+
+        // TITOLO abbassato per le immagini più grandi
+        page.drawText("SCHERMO DI HESS", {
+            x: 50,
+            y: 550,
+            size: 28,
+            font: helveticaBoldFont,
+            color: rgb(0, 0.2, 0.6),
+        });
+        // SEPARATORE
+        page.drawLine({ start: { x: 50, y: 540 }, end: { x: 792, y: 540 }, thickness: 1.5, color: rgb(0.7, 0.7, 0.7) });
+
+        // Colonne sinistra
+        datiSinistra.forEach(([label, valore], index) => {
+            const yPos = datiY - (index * 16);
+            page.drawText(label, {
+                x: col1X, y: yPos, size: 12, font: helveticaFont, color: rgb(0.4, 0.4, 0.4)
+            });
+            const valoreX = col1X + labelOffset;
+            page.drawText(valore?.toString() || "", {
+                x: valoreX, y: yPos, size: 12, font: helveticaBoldFont, color: rgb(0, 0, 0)
+            });
+        });
+
+        // Colonne destra
+        datiDestra.forEach(([label, valore], index) => {
+            const yPos = datiY - (index * 16);
+            page.drawText(label, {
+                x: col2X, y: yPos, size: 12, font: helveticaFont, color: rgb(0.4, 0.4, 0.4)
+            });
+            const valoreX = col2X + labelOffset;
+            page.drawText(valore?.toString() || "", {
+                x: valoreX, y: yPos, size: 12, font: helveticaBoldFont, color: rgb(0, 0, 0)
+            });
+        });
+
+        // Footer
+        const ora = new Date().toLocaleString("it-IT");
+        const oraWidth = helveticaFont.widthOfTextAtSize(`Generato: ${ora}`, 10);
+        page.drawText(`Generato: ${ora}`, {
+            x: (842 - oraWidth) / 2, y: 20, size: 10, font: helveticaFont, color: rgb(0.5, 0.5, 0.5)
+        });
+
+        const pdfBytes = await pdfDoc.save();
+        const paziente = anonymous ? (visita.patient.toString().toUpperCase()) : (visita.patientData.firstName + "-" + visita.patientData.lastName)
+        downloadPDF(pdfBytes, `scheda_${paziente}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}_${selectedPair.nomeCoppia}_${nomiGruppi[selectedPair.gruppoIndex]}.pdf`);
+    }
+    // Helper function to process images (invariata)
+    async function processImageForPDF(imgSrc, pdfDoc) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = imgSrc;
+
+        await new Promise((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject(new Error('Errore caricamento immagine'));
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 2048;
+        canvas.height = 2048;
+        const ctx = canvas.getContext('2d');
         const cropX = 2048;
         const cropY = 0;
         const cropWidth = 2048;
         const cropHeight = 2048;
 
-        try {
-            const logoResponse = await fetch(selectedPair.img1Src);
-            const logoBytes = await logoResponse.arrayBuffer();
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.src = selectedPair.img1Src;
+        ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
 
-            await new Promise((resolve, reject) => {
-                img.onload = () => resolve();
-                img.onerror = () => reject(new Error('Errore caricamento immagine'));
-            });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const croppedBytes = await blob.arrayBuffer();
+        const image = await pdfDoc.embedPng(new Uint8Array(croppedBytes));
 
-            const canvas = document.createElement('canvas');
-            canvas.width = cropWidth;
-            canvas.height = cropHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-            const croppedBytes = await blob.arrayBuffer();
-            const logoImage = await pdfDoc.embedPng(new Uint8Array(croppedBytes));
-
-            const logoScale = 0.0977;
-            const logoWidth = cropWidth * logoScale;
-            const logoHeight = cropHeight * logoScale;
-            const centerX = (842 - logoWidth) / 2;
-            const centerY = 250;
-
-            page.drawImage(logoImage, {
-                x: centerX,
-                y: centerY,
-                width: logoWidth,
-                height: logoHeight,
-            });
-        } catch (e) {
-            console.error('Errore logo:', e);
-        }
-
-        page.drawText("SCHERMO DI HESS", {
-            x: 50, y: 520, size: 24, font: helveticaFont, color: rgb(0, 0.2, 0.6),
-        });
-
-        const datiY = 180;
-        const dati = [
-            ["Paziente:", `${visita.patientData.firstName} ${visita.patientData.lastName}`],
-            ["Data Visita:", new Date(visita.visitDate).toLocaleDateString("it-IT")],
-            ["Motivazione:", visita.reason],
-            ["Note:", visita.notes || "Nessuna nota"],
-            ["Gruppo:", nomiGruppi[selectedPair.gruppoIndex]],
-            ["Tipo Coppia:", selectedPair.nomeCoppia],
-            ["Immagini:", `[${selectedPair.img1Index + 1}-${selectedPair.img2Index + 1}]`],
-        ];
-
-        dati.forEach(([label, valore], index) => {
-            page.drawText(label, { x: 50, y: datiY - index * 35, size: 14, font: helveticaFont, color: rgb(0.3, 0.3, 0.3) });
-            const valoreWidth = helveticaFont.widthOfTextAtSize(valore, 14);
-            page.drawText(valore, { x: 750 - valoreWidth, y: datiY - index * 35, size: 14, font: helveticaFont, color: rgb(0, 0, 0) });
-        });
-
-        page.drawLine({ start: { x: 50, y: 505 }, end: { x: 792, y: 505 }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
-
-        const ora = new Date().toLocaleString("it-IT");
-        page.drawText(`Generato: ${ora}`, { x: 50, y: 35, size: 10, font: helveticaFont, color: rgb(0.5, 0.5, 0.5) });
-
-        const pdfBytes = await pdfDoc.save();
-        downloadPDF(pdfBytes, `scheda_${visita.patientData.firstName}-${visita.patientData.lastName}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}_${selectedPair.nomeCoppia}_${nomiGruppi[selectedPair.gruppoIndex]}.pdf`);
+        return { image };
     }
 
     function downloadPDF(pdfBytes, filename) {
@@ -639,6 +309,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     }
+
 
     if (!isOpen) return null;
 
@@ -659,7 +330,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-white mb-1">📸 Coppie Immagini Visita</h2>
+                                    <h2 className="text-2xl font-bold text-white mb-1">SCHERMO DI HESS</h2>
                                     <p className="text-white/90 text-sm font-medium">{visita?.reason || 'N/D'} - {new Date(visita?.visitDate).toLocaleDateString() || 'N/D'}</p>
                                 </div>
                             </div>
@@ -765,9 +436,20 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                             </div>
 
                             <div className="flex items-center space-x-3">
-                                <button onClick={generaPDF} className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all group shadow-xl" title="Scarica PDF">
+                                <button onClick={() => generaPDF()} className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all group shadow-xl" title="Scarica PDF">
                                     <svg className="w-7 h-7 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4" />
+                                    </svg>
+                                </button>
+                                <button onClick={() => generaPDF(true)} className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all group shadow-xl" title="Scarica PDF">
+                                    <svg className="w-7 h-7 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                        <g id="SVGRepo_bgCarrier" strokeWidth="0" />
+
+                                        <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" />
+
+                                        <g id="SVGRepo_iconCarrier"> <path d="M2.21967 2.21967C1.9534 2.48594 1.9292 2.9026 2.14705 3.19621L2.21967 3.28033L6.25424 7.3149C4.33225 8.66437 2.89577 10.6799 2.29888 13.0644C2.1983 13.4662 2.4425 13.8735 2.84431 13.9741C3.24613 14.0746 3.6534 13.8305 3.75399 13.4286C4.28346 11.3135 5.59112 9.53947 7.33416 8.39452L9.14379 10.2043C8.43628 10.9258 8 11.9143 8 13.0046C8 15.2138 9.79086 17.0046 12 17.0046C13.0904 17.0046 14.0788 16.5683 14.8004 15.8608L20.7197 21.7803C21.0126 22.0732 21.4874 22.0732 21.7803 21.7803C22.0466 21.5141 22.0708 21.0974 21.8529 20.8038L21.7803 20.7197L15.6668 14.6055L15.668 14.604L8.71877 7.65782L8.72 7.656L7.58672 6.52549L3.28033 2.21967C2.98744 1.92678 2.51256 1.92678 2.21967 2.21967ZM12 5.5C10.9997 5.5 10.0291 5.64807 9.11109 5.925L10.3481 7.16119C10.8839 7.05532 11.4364 7 12 7C15.9231 7 19.3099 9.68026 20.2471 13.4332C20.3475 13.835 20.7546 14.0794 21.1565 13.9791C21.5584 13.8787 21.8028 13.4716 21.7024 13.0697C20.5994 8.65272 16.6155 5.5 12 5.5ZM12.1947 9.00928L15.996 12.81C15.8942 10.7531 14.2472 9.10764 12.1947 9.00928Z" fill="#ffffff" /> </g>
+
                                     </svg>
                                 </button>
                                 <button onClick={closeImageViewer} className="w-14 h-14 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all" title="Chiudi">
@@ -988,7 +670,7 @@ function GestioneVisite() {
                                     <select name="status" value={formData.status} onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
                                         <option value="SCHEDULED">Programmata</option>
-                                        <option value="COMPLETED">Completata</option>
+                                        {/* <option value="COMPLETED">Completata</option> */}
                                         <option value="CANCELLED">Annullata</option>
                                     </select>
                                 </div>
@@ -1100,10 +782,10 @@ function GestioneVisite() {
                                                         className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-lg hover:bg-emerald-200">
                                                         Modifica
                                                     </button>
-                                                    <button onClick={() => handleDelete(visita.$id)}
+                                                    {/* <button onClick={() => handleDelete(visita.$id)}
                                                         className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-lg hover:bg-red-200">
                                                         Elimina
-                                                    </button>
+                                                    </button> */}
                                                 </td>
                                             </tr>
                                         ))}

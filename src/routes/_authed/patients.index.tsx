@@ -313,7 +313,7 @@ function GestionePazienti() {
                         <option value="">Seleziona una patologia...</option>
                         <option value="Ipertensione">Ipertensione</option>
                         <option value="Diabete tipo 2">Diabete tipo 2</option>
-                        <option value="Allergia penicillina">Allergia penicillina</option>
+                        <option value="Allergia farmaci">Allergia farmaci</option>
                         <option value="Asma bronchiale">Asma bronchiale</option>
                       </select>
                       <button
@@ -431,10 +431,10 @@ function GestionePazienti() {
                           className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-md hover:bg-purple-200">
                           Documenti
                         </button>
-                        <button onClick={() => handleDelete(paziente.$id)}
+                        {/* <button onClick={() => handleDelete(paziente.$id)}
                           className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-md hover:bg-red-200">
                           Elimina
-                        </button>
+                        </button> */}
                       </td>
                     </tr>
                   ))}
