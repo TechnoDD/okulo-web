@@ -80,41 +80,459 @@ const initialFormState = {
 };
 
 
-// Componente modale per le immagini - VERSIONE MODIFICATA PER 6 GRUPPI
-// Componente modale per le immagini - VERSIONE CON NOMI GRUPPI PERSONALIZZATI
+// function ImmaginiModale({ isOpen, onClose, visita }) {
+//     const [loadingImages, setLoadingImages] = useState(true);
+//     const [selectedImage, setSelectedImage] = useState(null);
+
+//     // Nomi dei 6 gruppi specifici
+//     const nomiGruppi = [
+//         "Giro completo rosso",
+//         "Giro completo verde",
+//         "Giro random interno rosso",
+//         "Giro random interno verde",
+//         "Giro random esterno rosso",
+//         "Giro random esterno verde"
+//     ];
+
+//     // Genera 42 immagini raggruppate in 6 gruppi
+//     const gruppiImmagini = [];
+//     const numImmagini = 42;
+//     const immaginiPerGruppo = 7;
+//     const numGruppi = 6;
+
+//     for (let gruppoIndex = 0; gruppoIndex < numGruppi; gruppoIndex++) {
+//         const immaginiGruppo = [];
+//         for (let i = 0; i < immaginiPerGruppo; i++) {
+//             const immagineIndex = gruppoIndex * immaginiPerGruppo + i;
+//             immaginiGruppo.push({
+//                 id: immagineIndex + 1,
+//                 src: `${import.meta.env.VITE_APPWRITE_ENDPOINT}/storage/buckets/${import.meta.env.VITE_APPWRITE_BUCKET_ID}/files/${visita?.comparisons[immagineIndex]}/view?project=${import.meta.env.VITE_APPWRITE_PROJECT_ID}&mode=admin`,
+//                 alt: `Immagine ${immagineIndex + 1} - ${nomiGruppi[gruppoIndex]}`
+//             });
+//         }
+//         gruppiImmagini.push({
+//             nome: nomiGruppi[gruppoIndex],
+//             immagini: immaginiGruppo
+//         });
+//     }
+
+//     useEffect(() => {
+//         if (isOpen) {
+//             setLoadingImages(false);
+//         }
+//     }, [isOpen]);
+
+//     const handleImageClick = (immagine) => {
+//         setSelectedImage(immagine);
+//     };
+
+//     const closeImageViewer = () => {
+//         setSelectedImage(null);
+//     };
+
+//     async function generaPDF() {
+//         // Crea PDF A4 Landscape (842 x 595 pt)
+//         const pdfDoc = await PDFDocument.create();
+//         const page = pdfDoc.addPage([842, 595]); // A4 Landscape
+
+//         // Colori e font
+//         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+//         // === SEZIONE LOGO CON PORZIONE SPECIFICA ===
+//         const cropX = 2048;      // Pixel da saltare orizzontalmente
+//         const cropY = 0;      // Pixel da saltare verticalmente
+//         const cropWidth = 2048; // Larghezza porzione da estrarre
+//         const cropHeight = 2048; // Altezza porzione da estrarre
+
+//         try {
+//             // 1. Carica immagine completa da URL
+//             const logoResponse = await fetch(selectedImage.src);
+//             const logoBytes = await logoResponse.arrayBuffer();
+
+//             // 2. Crea immagine DOM per dimensioni originali
+//             const img = new Image();
+//             img.crossOrigin = 'anonymous';
+//             img.src = selectedImage.src;
+
+//             await new Promise((resolve, reject) => {
+//                 img.onload = () => resolve();
+//                 img.onerror = () => reject(new Error('Errore caricamento immagine'));
+//             });
+
+//             // 3. ESTRAI PORZIONE con Canvas (senza visualizzarla)
+//             const canvas = document.createElement('canvas');
+//             canvas.width = cropWidth;
+//             canvas.height = cropHeight;
+//             const ctx = canvas.getContext('2d');
+
+//             // drawImage(img, xOrig, yOrig, wOrig, hOrig, xDest, yDest, wDest, hDest)
+//             ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+//             // 4. Canvas → PNG → Uint8Array per pdf-lib
+//             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+//             const croppedBytes = await blob.arrayBuffer();
+//             const logoImage = await pdfDoc.embedPng(new Uint8Array(croppedBytes));
+
+//             // 5. Posiziona porzione estratta (usa dimensioni della porzione)
+//             const logoScale = 0.0977;  // Mantieni scala originale o adatta
+//             const logoWidth = cropWidth * logoScale;
+//             const logoHeight = cropHeight * logoScale;
+
+//             const centerX = (842 - logoWidth) / 2;
+//             const centerY = 250;
+
+//             page.drawImage(logoImage, {
+//                 x: centerX,
+//                 y: centerY,
+//                 width: logoWidth,
+//                 height: logoHeight,
+//             });
+
+//         } catch (e) {
+//             console.error('Errore nel caricamento/estrazione porzione logo:', e);
+//             // Fallback: usa immagine completa se fallisce
+//             try {
+//                 const logoImage = await pdfDoc.embedPng(new Uint8Array(logoBytes));
+//                 const logoWidth = 6144 * 0.0977;
+//                 const logoHeight = 2048 * 0.0977;
+//                 const centerX = (842 - logoWidth) / 2;
+//                 page.drawImage(logoImage, {
+//                     x: centerX,
+//                     y: centerY,
+//                     width: logoWidth,
+//                     height: logoHeight,
+//                 });
+//             } catch (e2) {
+//                 console.error('Fallback logo fallito:', e2);
+//             }
+//         }
+
+//         // === TITOLO ===
+//         page.drawText("SCHEDA MEDICA PAZIENTE", {
+//             x: 50,
+//             y: 520,
+//             size: 24,
+//             font: helveticaFont,
+//             color: rgb(0, 0.2, 0.6),
+//         });
+
+//         // === CAMPi DATI (sotto immagine) ===
+//         const datiY = 180;
+//         const dati = [
+//             ["Paziente:", `${visita.patientData.firstName} ${visita.patientData.lastName}`],
+//             ["Data Visita:", new Date(visita.visitDate).toLocaleDateString("it-IT")],
+//             ["Motivazione:", visita.reason],
+//             ["Note:", visita.notes || "Nessuna nota"],
+//         ];
+
+//         dati.forEach(([label, valore], index) => {
+//             // Label sinistra
+//             page.drawText(label, {
+//                 x: 50,
+//                 y: datiY - index * 40,
+//                 size: 14,
+//                 font: helveticaFont,
+//                 color: rgb(0.3, 0.3, 0.3),
+//             });
+
+//             // Valore destra
+//             const valoreWidth = helveticaFont.widthOfTextAtSize(valore, 14);
+//             page.drawText(valore, {
+//                 x: 750 - valoreWidth,
+//                 y: datiY - index * 40,
+//                 size: 14,
+//                 font: helveticaFont,
+//                 color: rgb(0, 0, 0),
+//             });
+//         });
+
+//         // === LINEE DECORATIVE ===
+//         page.drawLine({
+//             start: { x: 50, y: 505 },
+//             end: { x: 792, y: 505 },
+//             thickness: 1,
+//             color: rgb(0.8, 0.8, 0.8),
+//         });
+
+//         // === DATA/ORA DOCUMENTO ===
+//         const ora = new Date().toLocaleString("it-IT");
+//         page.drawText(`Generato: ${ora}`, {
+//             x: 50,
+//             y: 35,
+//             size: 10,
+//             font: helveticaFont,
+//             color: rgb(0.5, 0.5, 0.5),
+//         });
+
+//         // === DOWNLOAD ===
+//         const pdfBytes = await pdfDoc.save();
+//         downloadPDF(
+//             pdfBytes,
+//             `scheda_paziente_${visita.patientData.firstName}-${visita.patientData.lastName}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}.pdf`,
+//         );
+//     }
+
+//     function downloadPDF(pdfBytes, filename) {
+//         const blob = new Blob([pdfBytes], { type: "application/pdf" });
+//         const url = URL.createObjectURL(blob);
+//         const link = document.createElement("a");
+//         link.href = url;
+//         link.download = filename;
+//         document.body.appendChild(link);
+//         link.click();
+//         document.body.removeChild(link);
+//         URL.revokeObjectURL(url);
+//     }
+//     // >>>>>>>>>>>>> FINE AGGIUNTA <<<<<<<<<<<<<
+
+//     if (!isOpen) return null;
+
+//     return (
+//         <>
+//             {/* MODALE PRINCIPALE GALLERIA */}
+//             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => {
+//                 setSelectedImage(null);
+//                 onClose();
+//             }}>
+//                 <div className="bg-white rounded-3xl shadow-2xl max-w-7xl max-h-[90vh] w-full max-md:w-11/12 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+//                     {/* Header modale */}
+//                     <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 pb-4 rounded-t-3xl">
+//                         <div className="flex items-center justify-between">
+//                             <div className="flex items-center">
+//                                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-4">
+//                                     <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+//                                     </svg>
+//                                 </div>
+//                                 <div>
+//                                     <h2 className="text-2xl font-bold text-white mb-1">
+//                                         📸 Immagini Visita ({numImmagini} totali)
+//                                     </h2>
+//                                     <p className="text-white/90 text-sm font-medium">
+//                                         {visita?.reason || 'N/D'} - {new Date(visita?.visitDate).toLocaleDateString() || 'N/D'}
+//                                     </p>
+//                                 </div>
+//                             </div>
+//                             <button
+//                                 onClick={() => {
+//                                     setSelectedImage(null);
+//                                     onClose();
+//                                 }}
+//                                 className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
+//                             >
+//                                 <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+//                                 </svg>
+//                             </button>
+//                         </div>
+//                     </div>
+
+//                     {/* Contenuto modale */}
+//                     <div className="p-8 max-h-[70vh] overflow-y-auto">
+//                         {loadingImages ? (
+//                             <div className="flex items-center justify-center py-20">
+//                                 <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
+//                                 <span className="ml-3 text-lg text-gray-600 font-medium">Caricamento immagini...</span>
+//                             </div>
+//                         ) : (
+//                             <div className="space-y-8">
+//                                 {gruppiImmagini.map((gruppo, gruppoIndex) => (
+//                                     <div key={gruppoIndex} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-6 border border-purple-100 shadow-lg">
+//                                         {/* Header del gruppo */}
+//                                         <div className="flex items-center mb-6 pb-4 border-b border-purple-200">
+//                                             <div className="w-12 h-16 bg-gradient-to-r from-red-500 to-green-500 rounded-2xl flex flex-col items-center justify-center mr-4 shadow-lg p-2">
+//                                                 <span className="text-lg font-bold text-white">{gruppoIndex + 1}</span>
+//                                                 <span className="text-xs text-white/90 font-medium">di 6</span>
+//                                             </div>
+//                                             <div>
+//                                                 <h3 className="text-xl font-bold text-gray-900 leading-tight">
+//                                                     {gruppo.nome}
+//                                                 </h3>
+//                                                 <p className="text-sm text-gray-600 font-medium mt-1">
+//                                                     {gruppo.immagini.length} immagini
+//                                                 </p>
+//                                             </div>
+//                                         </div>
+
+//                                         {/* Griglia immagini del gruppo */}
+//                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+//                                             {gruppo.immagini.map((immagine) => (
+//                                                 <div
+//                                                     key={immagine.id}
+//                                                     className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-2 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 hover:border-purple-200"
+//                                                     onClick={() => handleImageClick(immagine)}
+//                                                 >
+//                                                     <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+//                                                         <img
+//                                                             src={immagine.src}
+//                                                             alt={immagine.alt}
+//                                                             className="w-full h-full object-cover rounded-xl shadow-md group-hover:shadow-2xl transition-all duration-300"
+//                                                             loading="lazy"
+//                                                         />
+//                                                     </div>
+//                                                     <p className="text-xs text-gray-600 font-medium mt-2 text-center truncate px-1">
+//                                                         #{immagine.id}
+//                                                     </p>
+//                                                     {/* Overlay hover */}
+//                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
+//                                                         <div className="w-full bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl text-center shadow-lg">
+//                                                             <svg className="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16l5 5m11-1a9 9 0 10-18 0 9 9 0 0018 0z" />
+//                                                             </svg>
+//                                                             <span className="text-sm font-semibold text-gray-800">Ingrandisci</span>
+//                                                         </div>
+//                                                     </div>
+//                                                 </div>
+//                                             ))}
+//                                         </div>
+//                                     </div>
+//                                 ))}
+//                             </div>
+//                         )}
+//                     </div>
+
+//                     {/* Footer modale */}
+//                     <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
+//                         <div className="flex items-center justify-between">
+//                             <div className="text-sm text-gray-600">
+//                                 📊 Totale: <span className="font-semibold text-purple-600">{numImmagini}</span> immagini in <span className="font-semibold text-pink-600">{numGruppi}</span> gruppi
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+
+//             {/* VIEWER IMMAGINE INGRANDITA */}
+//             {selectedImage && (
+//                 <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={closeImageViewer}>
+//                     <div className="max-w-4xl max-h-[90vh] w-full h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
+//                         {/* Header viewer */}
+//                         <div className="flex items-center justify-between p-6 border-b border-white/20">
+//                             <div className="flex items-center space-x-3">
+//                                 <button
+//                                     onClick={closeImageViewer}
+//                                     className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
+//                                 >
+//                                     <svg className="w-6 h-6 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+//                                     </svg>
+//                                 </button>
+//                                 <div>
+//                                     <p className="text-white text-sm font-medium">
+//                                         Immagine #{selectedImage.id}/{numImmagini}
+//                                     </p>
+//                                     <p className="text-white/80 text-xs">
+//                                         {nomiGruppi[Math.floor((selectedImage.id - 1) / 7)]}
+//                                     </p>
+//                                 </div>
+//                             </div>
+
+//                             {/* >>>>>>>>>>>>> Header: bottone Download PDF + X <<<<<<<<<<<<< */}
+//                             <div className="flex items-center space-x-3">
+//                                 <button
+//                                     type="button"
+//                                     onClick={generaPDF}
+//                                     className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
+//                                     title="Scarica PDF"
+//                                 >
+//                                     <svg
+//                                         className="w-6 h-6 text-white group-hover:scale-110 transition-transform"
+//                                         fill="none"
+//                                         stroke="currentColor"
+//                                         viewBox="0 0 24 24"
+//                                     >
+//                                         <path
+//                                             strokeLinecap="round"
+//                                             strokeLinejoin="round"
+//                                             strokeWidth={2}
+//                                             d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4"
+//                                         />
+//                                     </svg>
+//                                 </button>
+
+//                                 <button
+//                                     type="button"
+//                                     onClick={closeImageViewer}
+//                                     className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all cursor-pointer"
+//                                     title="Chiudi"
+//                                 >
+//                                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+//                                     </svg>
+//                                 </button>
+//                             </div>
+//                             {/* >>>>>>>>>>>>> FINE AGGIUNTA HEADER <<<<<<<<<<<<< */}
+//                         </div>
+
+//                         {/* Immagine ingrandita */}
+//                         <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
+//                             <img
+//                                 src={selectedImage.src}
+//                                 alt={selectedImage.alt}
+//                                 className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+//                             />
+//                         </div>
+//                     </div>
+//                 </div>
+//             )}
+//         </>
+//     );
+// }
+
 function ImmaginiModale({ isOpen, onClose, visita }) {
     const [loadingImages, setLoadingImages] = useState(true);
-    const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedPair, setSelectedPair] = useState(null);
 
-    // Nomi dei 6 gruppi specifici
+    // Nomi dei 7 gruppi
     const nomiGruppi = [
-        "Giro completo rosso",
-        "Giro completo verde",
-        "Giro random interno rosso",
-        "Giro random interno verde",
-        "Giro random esterno rosso",
-        "Giro random esterno verde"
+        "Completo",
+        "Paresi Retto inferiore Dx",
+        "Paresi Retto laterale Sx",
+        "Paresi Retto mediale Sx",
+        "Paresi Retto superiore Dx",
+        "Paresi Obq. inferiore Dx",
+        "Paresi Obq. superiore Dx"
     ];
 
-    // Genera 42 immagini raggruppate in 6 gruppi
-    const gruppiImmagini = [];
-    const numImmagini = 42;
-    const immaginiPerGruppo = 7;
-    const numGruppi = 6;
+    // Nomi specifici per le COPPIE
+    const nomiCoppie = ["Completo", "Random interno", "Random esterno"];
+
+    // ORGANIZZAZIONE COPPIE PER GRUPPO
+    const organizzazioneCoppie = [
+        [[0, 7], [14, 21], [28, 35]],
+        [[1, 8], [15, 22], [29, 36]],
+        [[2, 9], [16, 23], [30, 37]],
+        [[3, 10], [17, 24], [31, 38]],
+        [[4, 11], [18, 25], [32, 39]],
+        [[5, 12], [19, 26], [33, 40]],
+        [[6, 13], [20, 27], [34, 41]]
+    ];
+
+    // Genera 21 pulsanti raggruppati in 7 gruppi
+    const gruppiPulsanti = [];
+    const numGruppi = 7;
 
     for (let gruppoIndex = 0; gruppoIndex < numGruppi; gruppoIndex++) {
-        const immaginiGruppo = [];
-        for (let i = 0; i < immaginiPerGruppo; i++) {
-            const immagineIndex = gruppoIndex * immaginiPerGruppo + i;
-            immaginiGruppo.push({
-                id: immagineIndex + 1,
-                src: `${import.meta.env.VITE_APPWRITE_ENDPOINT}/storage/buckets/${import.meta.env.VITE_APPWRITE_BUCKET_ID}/files/${visita?.comparisons[immagineIndex]}/view?project=${import.meta.env.VITE_APPWRITE_PROJECT_ID}&mode=admin`,
-                alt: `Immagine ${immagineIndex + 1} - ${nomiGruppi[gruppoIndex]}`
+        const pulsantiGruppo = [];
+        const coppieGruppo = organizzazioneCoppie[gruppoIndex];
+
+        coppieGruppo.forEach((coppiaIndici, pulsanteIndex) => {
+            const [img1Index, img2Index] = coppiaIndici;
+            pulsantiGruppo.push({
+                id: gruppoIndex * 3 + pulsanteIndex + 1,
+                img1Index,
+                img2Index,
+                nomeCoppia: nomiCoppie[pulsanteIndex],
+                gruppoIndex,
+                img1Src: `${import.meta.env.VITE_APPWRITE_ENDPOINT}/storage/buckets/${import.meta.env.VITE_APPWRITE_BUCKET_ID}/files/${visita?.comparisons[img1Index]}/view?project=${import.meta.env.VITE_APPWRITE_PROJECT_ID}&mode=admin`,
+                img2Src: `${import.meta.env.VITE_APPWRITE_ENDPOINT}/storage/buckets/${import.meta.env.VITE_APPWRITE_BUCKET_ID}/files/${visita?.comparisons[img2Index]}/view?project=${import.meta.env.VITE_APPWRITE_PROJECT_ID}&mode=admin`,
+                alt: `${nomiCoppie[pulsanteIndex]} - ${nomiGruppi[gruppoIndex]}`
             });
-        }
-        gruppiImmagini.push({
+        });
+
+        gruppiPulsanti.push({
             nome: nomiGruppi[gruppoIndex],
-            immagini: immaginiGruppo
+            pulsanti: pulsantiGruppo
         });
     }
 
@@ -124,62 +542,49 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         }
     }, [isOpen]);
 
-    const handleImageClick = (immagine) => {
-        setSelectedImage(immagine);
+    const handlePulsanteClick = (pulsante) => {
+        setSelectedPair(pulsante);
     };
 
     const closeImageViewer = () => {
-        setSelectedImage(null);
+        setSelectedPair(null);
     };
 
     async function generaPDF() {
-        // Crea PDF A4 Landscape (842 x 595 pt)
         const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage([842, 595]); // A4 Landscape
-
-        // Colori e font
+        const page = pdfDoc.addPage([842, 595]);
         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-        // === SEZIONE LOGO CON PORZIONE SPECIFICA ===
-        const cropX = 2048;      // Pixel da saltare orizzontalmente
-        const cropY = 0;      // Pixel da saltare verticalmente
-        const cropWidth = 2048; // Larghezza porzione da estrarre
-        const cropHeight = 2048; // Altezza porzione da estrarre
+        const cropX = 2048;
+        const cropY = 0;
+        const cropWidth = 2048;
+        const cropHeight = 2048;
 
         try {
-            // 1. Carica immagine completa da URL
-            const logoResponse = await fetch(selectedImage.src);
+            const logoResponse = await fetch(selectedPair.img1Src);
             const logoBytes = await logoResponse.arrayBuffer();
-
-            // 2. Crea immagine DOM per dimensioni originali
             const img = new Image();
             img.crossOrigin = 'anonymous';
-            img.src = selectedImage.src;
+            img.src = selectedPair.img1Src;
 
             await new Promise((resolve, reject) => {
                 img.onload = () => resolve();
                 img.onerror = () => reject(new Error('Errore caricamento immagine'));
             });
 
-            // 3. ESTRAI PORZIONE con Canvas (senza visualizzarla)
             const canvas = document.createElement('canvas');
             canvas.width = cropWidth;
             canvas.height = cropHeight;
             const ctx = canvas.getContext('2d');
-
-            // drawImage(img, xOrig, yOrig, wOrig, hOrig, xDest, yDest, wDest, hDest)
             ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
 
-            // 4. Canvas → PNG → Uint8Array per pdf-lib
             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
             const croppedBytes = await blob.arrayBuffer();
             const logoImage = await pdfDoc.embedPng(new Uint8Array(croppedBytes));
 
-            // 5. Posiziona porzione estratta (usa dimensioni della porzione)
-            const logoScale = 0.0977;  // Mantieni scala originale o adatta
+            const logoScale = 0.0977;
             const logoWidth = cropWidth * logoScale;
             const logoHeight = cropHeight * logoScale;
-
             const centerX = (842 - logoWidth) / 2;
             const centerY = 250;
 
@@ -189,89 +594,38 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                 width: logoWidth,
                 height: logoHeight,
             });
-
         } catch (e) {
-            console.error('Errore nel caricamento/estrazione porzione logo:', e);
-            // Fallback: usa immagine completa se fallisce
-            try {
-                const logoImage = await pdfDoc.embedPng(new Uint8Array(logoBytes));
-                const logoWidth = 6144 * 0.0977;
-                const logoHeight = 2048 * 0.0977;
-                const centerX = (842 - logoWidth) / 2;
-                page.drawImage(logoImage, {
-                    x: centerX,
-                    y: centerY,
-                    width: logoWidth,
-                    height: logoHeight,
-                });
-            } catch (e2) {
-                console.error('Fallback logo fallito:', e2);
-            }
+            console.error('Errore logo:', e);
         }
 
-        // === TITOLO ===
-        page.drawText("SCHEDA MEDICA PAZIENTE", {
-            x: 50,
-            y: 520,
-            size: 24,
-            font: helveticaFont,
-            color: rgb(0, 0.2, 0.6),
+        page.drawText("SCHERMO DI HESS", {
+            x: 50, y: 520, size: 24, font: helveticaFont, color: rgb(0, 0.2, 0.6),
         });
 
-        // === CAMPi DATI (sotto immagine) ===
         const datiY = 180;
         const dati = [
             ["Paziente:", `${visita.patientData.firstName} ${visita.patientData.lastName}`],
             ["Data Visita:", new Date(visita.visitDate).toLocaleDateString("it-IT")],
             ["Motivazione:", visita.reason],
             ["Note:", visita.notes || "Nessuna nota"],
+            ["Gruppo:", nomiGruppi[selectedPair.gruppoIndex]],
+            ["Tipo Coppia:", selectedPair.nomeCoppia],
+            ["Immagini:", `[${selectedPair.img1Index + 1}-${selectedPair.img2Index + 1}]`],
         ];
 
         dati.forEach(([label, valore], index) => {
-            // Label sinistra
-            page.drawText(label, {
-                x: 50,
-                y: datiY - index * 40,
-                size: 14,
-                font: helveticaFont,
-                color: rgb(0.3, 0.3, 0.3),
-            });
-
-            // Valore destra
+            page.drawText(label, { x: 50, y: datiY - index * 35, size: 14, font: helveticaFont, color: rgb(0.3, 0.3, 0.3) });
             const valoreWidth = helveticaFont.widthOfTextAtSize(valore, 14);
-            page.drawText(valore, {
-                x: 750 - valoreWidth,
-                y: datiY - index * 40,
-                size: 14,
-                font: helveticaFont,
-                color: rgb(0, 0, 0),
-            });
+            page.drawText(valore, { x: 750 - valoreWidth, y: datiY - index * 35, size: 14, font: helveticaFont, color: rgb(0, 0, 0) });
         });
 
-        // === LINEE DECORATIVE ===
-        page.drawLine({
-            start: { x: 50, y: 505 },
-            end: { x: 792, y: 505 },
-            thickness: 1,
-            color: rgb(0.8, 0.8, 0.8),
-        });
+        page.drawLine({ start: { x: 50, y: 505 }, end: { x: 792, y: 505 }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
 
-        // === DATA/ORA DOCUMENTO ===
         const ora = new Date().toLocaleString("it-IT");
-        page.drawText(`Generato: ${ora}`, {
-            x: 50,
-            y: 35,
-            size: 10,
-            font: helveticaFont,
-            color: rgb(0.5, 0.5, 0.5),
-        });
+        page.drawText(`Generato: ${ora}`, { x: 50, y: 35, size: 10, font: helveticaFont, color: rgb(0.5, 0.5, 0.5) });
 
-        // === DOWNLOAD ===
         const pdfBytes = await pdfDoc.save();
-        downloadPDF(
-            pdfBytes,
-            `scheda_paziente_${visita.patientData.firstName}-${visita.patientData.lastName}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}.pdf`,
-        );
+        downloadPDF(pdfBytes, `scheda_${visita.patientData.firstName}-${visita.patientData.lastName}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}_${selectedPair.nomeCoppia}_${nomiGruppi[selectedPair.gruppoIndex]}.pdf`);
     }
 
     function downloadPDF(pdfBytes, filename) {
@@ -285,19 +639,17 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     }
-    // >>>>>>>>>>>>> FINE AGGIUNTA <<<<<<<<<<<<<
 
     if (!isOpen) return null;
 
     return (
         <>
-            {/* MODALE PRINCIPALE GALLERIA */}
+            {/* MODALE PRINCIPALE */}
             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => {
-                setSelectedImage(null);
+                setSelectedPair(null);
                 onClose();
             }}>
                 <div className="bg-white rounded-3xl shadow-2xl max-w-7xl max-h-[90vh] w-full max-md:w-11/12 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                    {/* Header modale */}
                     <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 pb-4 rounded-t-3xl">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center">
@@ -307,81 +659,74 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-white mb-1">
-                                        📸 Immagini Visita ({numImmagini} totali)
-                                    </h2>
-                                    <p className="text-white/90 text-sm font-medium">
-                                        {visita?.reason || 'N/D'} - {new Date(visita?.visitDate).toLocaleDateString() || 'N/D'}
-                                    </p>
+                                    <h2 className="text-2xl font-bold text-white mb-1">📸 Coppie Immagini Visita</h2>
+                                    <p className="text-white/90 text-sm font-medium">{visita?.reason || 'N/D'} - {new Date(visita?.visitDate).toLocaleDateString() || 'N/D'}</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => {
-                                    setSelectedImage(null);
-                                    onClose();
-                                }}
-                                className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
-                            >
-                                <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button onClick={() => { setSelectedPair(null); onClose(); }} className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group">
+                                <svg className="w-6 h-6 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
                     </div>
 
-                    {/* Contenuto modale */}
                     <div className="p-8 max-h-[70vh] overflow-y-auto">
                         {loadingImages ? (
                             <div className="flex items-center justify-center py-20">
                                 <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
-                                <span className="ml-3 text-lg text-gray-600 font-medium">Caricamento immagini...</span>
+                                <span className="ml-3 text-lg text-gray-600 font-medium">Caricamento coppie...</span>
                             </div>
                         ) : (
                             <div className="space-y-8">
-                                {gruppiImmagini.map((gruppo, gruppoIndex) => (
+                                {gruppiPulsanti.map((gruppo, gruppoIndex) => (
                                     <div key={gruppoIndex} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-6 border border-purple-100 shadow-lg">
-                                        {/* Header del gruppo */}
                                         <div className="flex items-center mb-6 pb-4 border-b border-purple-200">
                                             <div className="w-12 h-16 bg-gradient-to-r from-red-500 to-green-500 rounded-2xl flex flex-col items-center justify-center mr-4 shadow-lg p-2">
                                                 <span className="text-lg font-bold text-white">{gruppoIndex + 1}</span>
-                                                <span className="text-xs text-white/90 font-medium">di 6</span>
+                                                <span className="text-xs text-white/90 font-medium">di 7</span>
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-bold text-gray-900 leading-tight">
-                                                    {gruppo.nome}
-                                                </h3>
-                                                <p className="text-sm text-gray-600 font-medium mt-1">
-                                                    {gruppo.immagini.length} immagini
-                                                </p>
+                                                <h3 className="text-xl font-bold text-gray-900">{gruppo.nome}</h3>
+                                                <p className="text-sm text-gray-600 font-medium mt-1">{gruppo.pulsanti.length} coppie</p>
                                             </div>
                                         </div>
 
-                                        {/* Griglia immagini del gruppo */}
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                                            {gruppo.immagini.map((immagine) => (
-                                                <div
-                                                    key={immagine.id}
-                                                    className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-2 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 hover:border-purple-200"
-                                                    onClick={() => handleImageClick(immagine)}
-                                                >
-                                                    <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {gruppo.pulsanti.map((pulsante) => (
+                                                <div key={pulsante.id} className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-4 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden border-2 border-gray-100 hover:border-purple-300 h-fit" onClick={() => handlePulsanteClick(pulsante)}>
+
+                                                    {/* ✅ ANTEPRIMA IMG1 E IMG2 - LAYOUT ORIZZONTALE */}
+                                                    <div className="w-full h-32 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-xl overflow-hidden flex items-center justify-center mb-3 mx-auto">
                                                         <img
-                                                            src={immagine.src}
-                                                            alt={immagine.alt}
-                                                            className="w-full h-full object-cover rounded-xl shadow-md group-hover:shadow-2xl transition-all duration-300"
+                                                            src={pulsante.img1Src}
+                                                            alt={`${pulsante.alt} - 1`}
+                                                            className="w-1/2 h-full object-cover"
+                                                            loading="lazy"
+                                                        />
+                                                        <div className="w-px h-20 bg-gradient-to-b from-white/50 to-transparent mx-2"></div>
+                                                        <img
+                                                            src={pulsante.img2Src}
+                                                            alt={`${pulsante.alt} - 2`}
+                                                            className="w-1/2 h-full object-cover"
                                                             loading="lazy"
                                                         />
                                                     </div>
-                                                    <p className="text-xs text-gray-600 font-medium mt-2 text-center truncate px-1">
-                                                        #{immagine.id}
-                                                    </p>
-                                                    {/* Overlay hover */}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
-                                                        <div className="w-full bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl text-center shadow-lg">
-                                                            <svg className="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                                    <div className="text-center mt-3">
+                                                        <p className="text-sm font-bold text-gray-800">{pulsante.nomeCoppia}</p>
+                                                        <p className="text-xs text-gray-500">[{pulsante.img1Index + 1}-{pulsante.img2Index + 1}]</p>
+                                                    </div>
+
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                                                        <div className="bg-white/95 backdrop-blur-sm px-6 py-3 rounded-2xl text-center shadow-2xl">
+                                                            <svg className="w-6 h-6 inline mr-2 text-purple-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16l5 5m11-1a9 9 0 10-18 0 9 9 0 0018 0z" />
                                                             </svg>
-                                                            <span className="text-sm font-semibold text-gray-800">Ingrandisci</span>
+                                                            <div>
+                                                                <span className="text-lg font-bold text-gray-800 block">Visualizza</span>
+                                                                <span className="text-xs text-gray-600 block">{pulsante.nomeCoppia}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -393,86 +738,54 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                         )}
                     </div>
 
-                    {/* Footer modale */}
                     <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600">
-                                📊 Totale: <span className="font-semibold text-purple-600">{numImmagini}</span> immagini in <span className="font-semibold text-pink-600">{numGruppi}</span> gruppi
-                            </div>
+                        <div className="text-sm text-gray-600">
+                            📊 Totale: <span className="font-semibold text-purple-600">21</span> coppie in <span className="font-semibold text-pink-600">7</span> gruppi
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* VIEWER IMMAGINE INGRANDITA */}
-            {selectedImage && (
-                <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={closeImageViewer}>
-                    <div className="max-w-4xl max-h-[90vh] w-full h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        {/* Header viewer */}
-                        <div className="flex items-center justify-between p-6 border-b border-white/20">
+            {/* VIEWER COPPIA */}
+            {selectedPair && (
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={closeImageViewer}>
+                    <div className="max-w-4xl max-h-[90vh] w-full h-full flex flex-col bg-white/10 backdrop-blur-sm rounded-3xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-6 border-b border-white/30 rounded-t-3xl">
                             <div className="flex items-center space-x-3">
-                                <button
-                                    onClick={closeImageViewer}
-                                    className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
-                                >
-                                    <svg className="w-6 h-6 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button onClick={closeImageViewer} className="w-14 h-14 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all group">
+                                    <svg className="w-7 h-7 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                     </svg>
                                 </button>
                                 <div>
-                                    <p className="text-white text-sm font-medium">
-                                        Immagine #{selectedImage.id}/{numImmagini}
-                                    </p>
-                                    <p className="text-white/80 text-xs">
-                                        {nomiGruppi[Math.floor((selectedImage.id - 1) / 7)]}
-                                    </p>
+                                    <p className="text-white text-xl font-bold">{selectedPair.nomeCoppia}</p>
+                                    <p className="text-white/90 text-lg">{nomiGruppi[selectedPair.gruppoIndex]}</p>
+                                    <p className="text-white/70 text-sm">[Img {selectedPair.img1Index + 1} - Img {selectedPair.img2Index + 1}]</p>
                                 </div>
                             </div>
 
-                            {/* >>>>>>>>>>>>> Header: bottone Download PDF + X <<<<<<<<<<<<< */}
                             <div className="flex items-center space-x-3">
-                                <button
-                                    type="button"
-                                    onClick={generaPDF}
-                                    className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all group"
-                                    title="Scarica PDF"
-                                >
-                                    <svg
-                                        className="w-6 h-6 text-white group-hover:scale-110 transition-transform"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4"
-                                        />
+                                <button onClick={generaPDF} className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all group shadow-xl" title="Scarica PDF">
+                                    <svg className="w-7 h-7 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4m0 0l4-4m-4 4V4" />
                                     </svg>
                                 </button>
-
-                                <button
-                                    type="button"
-                                    onClick={closeImageViewer}
-                                    className="w-12 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-all cursor-pointer"
-                                    title="Chiudi"
-                                >
-                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button onClick={closeImageViewer} className="w-14 h-14 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all" title="Chiudi">
+                                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
-                            {/* >>>>>>>>>>>>> FINE AGGIUNTA HEADER <<<<<<<<<<<<< */}
                         </div>
 
-                        {/* Immagine ingrandita */}
-                        <div className="flex-1 flex items-center justify-center p-8 overflow-auto">
-                            <img
-                                src={selectedImage.src}
-                                alt={selectedImage.alt}
-                                className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
-                            />
+                        <div className="flex-1 flex flex-col p-8 space-y-6 overflow-auto">
+                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4">
+                                <img src={selectedPair.img1Src} alt={selectedPair.alt} className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50" />
+                            </div>
+                            <div className="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent mx-8"></div>
+                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4">
+                                <img src={selectedPair.img2Src} alt={selectedPair.alt} className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -480,7 +793,6 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         </>
     );
 }
-
 
 function GestioneVisite() {
     const routerState = useRouterState();
