@@ -92,7 +92,7 @@ function GestioneDocumenti() {
 
   // 🔍 PAGINAZIONE - Nuovi stati
   const [currentPage, setCurrentPage] = useState(1);
-  const docsPerPage = 5;
+  const docsPerPage = 3;
 
   // STEP 2: Upload file e collega a riga esistente (CLIENT-SIDE)
   const completeUpload = useCallback(async (rowId: string, file: File) => {
