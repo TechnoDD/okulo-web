@@ -40,6 +40,10 @@ function GestionePazienti() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // 🔍 PAGINAZIONE - Nuovi stati
+  const [currentPage, setCurrentPage] = useState(1);
+  const patientsPerPage = 3;
+
   // 🔍 Leggi patient ID da URL (universale)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -108,16 +112,6 @@ function GestionePazienti() {
   // 🚀 Navigazione UNIVERSALE TanStack Start compatibile
   const navigaConPaziente = (paziente, path) => {
     setPazienteSelezionato(paziente);
-
-    // Costruisci URL con patient ID
-    // const url = new URL(path, window.location.origin);
-    // url.searchParams.set('patient', paziente.$id);
-
-    // PushState + trigger TanStack Router
-    // window.history.pushState({}, '', url.toString());
-    // window.dispatchEvent(new PopStateEvent('popstate'));
-
-
     navigate({ to: path, search: { patient: paziente.$id }, state: { paziente } });
   };
 
@@ -126,6 +120,12 @@ function GestionePazienti() {
     paziente.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     paziente.fiscalCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // 🔍 LOGICA PAGINAZIONE
+  const indexOfLastPatient = currentPage * patientsPerPage;
+  const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
+  const currentPatients = filteredPazienti.slice(indexOfFirstPatient, indexOfLastPatient);
+  const totalPages = Math.ceil(filteredPazienti.length / patientsPerPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -151,7 +151,7 @@ function GestionePazienti() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* FORM - identico al precedente */}
+          {/* FORM */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <div className="flex items-center mb-8">
               <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-2xl flex items-center justify-center mr-4">
@@ -164,38 +164,6 @@ function GestionePazienti() {
               </h2>
             </div>
 
-            {/* <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
-                  <input type="text" name="firstName" value={formData.firstName} onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" required />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Cognome *</label>
-                  <input type="text" name="lastName" value={formData.lastName} onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" required />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Data di Nascita</label>
-                  <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Codice Fiscale</label>
-                  <input type="text" name="fiscalCode" value={formData.fiscalCode} onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" maxLength="16" />
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                <button type="submit" disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                  {loading ? 'Salvando...' : (isEditing ? "Aggiorna" : "Aggiungi")}
-                </button>
-                {isEditing && <button type="button" onClick={handleCancelEdit} className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">Annulla</button>}
-              </div>
-            </form> */}
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {isEditing &&
@@ -204,7 +172,7 @@ function GestionePazienti() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">ID Paziente *</label>
                     <input
                       type="text"
-                      name="patientId"
+                      name="$id"
                       value={formData.$id.toString().toUpperCase()}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
@@ -221,7 +189,7 @@ function GestionePazienti() {
                     value={formData.firstName}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    required
+
                   />
                 </div>
 
@@ -234,7 +202,7 @@ function GestionePazienti() {
                     value={formData.lastName}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    required
+
                   />
                 </div>
 
@@ -260,7 +228,7 @@ function GestionePazienti() {
                     value={formData.gender}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    required
+
                   >
                     <option value="">Seleziona...</option>
                     <option value="M">Maschio</option>
@@ -371,7 +339,7 @@ function GestionePazienti() {
             </form>
           </div>
 
-          {/* LISTA PAZIENTI CON NAVIGAZIONE */}
+          {/* LISTA PAZIENTI CON NAVIGAZIONE E PAGINAZIONE */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center">
@@ -383,7 +351,7 @@ function GestionePazienti() {
                 <h2 className="text-2xl font-bold text-gray-900">Elenco Pazienti</h2>
               </div>
               <div className="text-sm font-semibold text-gray-700 bg-blue-100 px-3 py-1 rounded-full">
-                {filteredPazienti.length} / {pazienti.length}
+                {currentPatients.length} / {pazienti.length}
               </div>
             </div>
 
@@ -412,7 +380,7 @@ function GestionePazienti() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredPazienti.map((paziente) => (
+                  {currentPatients.map((paziente) => (
                     <tr key={paziente.$id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 font-medium text-gray-900">{paziente.firstName}</td>
                       <td className="px-6 py-4 text-gray-700">{paziente.lastName}</td>
@@ -431,16 +399,40 @@ function GestionePazienti() {
                           className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-md hover:bg-purple-200">
                           Documenti
                         </button>
-                        {/* <button onClick={() => handleDelete(paziente.$id)}
-                          className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-md hover:bg-red-200">
-                          Elimina
-                        </button> */}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {/* 🔍 CONTROLLI PAGINAZIONE */}
+            {filteredPazienti.length > patientsPerPage && (
+              <div className="mt-6 flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  Visualizzati {indexOfFirstPatient + 1}-{Math.min(indexOfLastPatient, filteredPazienti.length)} di {filteredPazienti.length} pazienti
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Precedente
+                  </button>
+                  <span className="px-3 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-lg">
+                    Pagina {currentPage} di {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Successiva
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

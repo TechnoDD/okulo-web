@@ -90,6 +90,10 @@ function GestioneDocumenti() {
   const [soloPazienteSelezionato, setSoloPazienteSelezionato] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // 🔍 PAGINAZIONE - Nuovi stati
+  const [currentPage, setCurrentPage] = useState(1);
+  const docsPerPage = 5;
+
   // STEP 2: Upload file e collega a riga esistente (CLIENT-SIDE)
   const completeUpload = useCallback(async (rowId: string, file: File) => {
     try {
@@ -277,6 +281,12 @@ function GestioneDocumenti() {
     return matchSearch && matchPatient;
   });
 
+  // 🔍 LOGICA PAGINAZIONE
+  const indexOfLastDoc = currentPage * docsPerPage;
+  const indexOfFirstDoc = indexOfLastDoc - docsPerPage;
+  const currentDocumenti = filteredDocumenti.slice(indexOfFirstDoc, indexOfLastDoc);
+  const totalPages = Math.ceil(filteredDocumenti.length / docsPerPage);
+
   const getNomePaziente = (pazienteId: any) => {
     const p = pazienti.find(p => p.$id === pazienteId);
     return p ? `${p.firstName} ${p.lastName}` : `Paziente #${pazienteId}`;
@@ -367,7 +377,6 @@ function GestioneDocumenti() {
                   value={formData.descrizione}
                   onChange={handleChange}
                   rows={3}
-                  required
                   disabled={loading}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 resize-vertical"
                   placeholder="Es. Referto cardiologico, analisi del sangue..."
@@ -390,12 +399,12 @@ function GestioneDocumenti() {
             </form>
           </div>
 
-          {/* ELENCO */}
+          {/* ELENCO CON PAGINAZIONE */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">Documenti</h2>
               <span className="text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                {filteredDocumenti.length}
+                {currentDocumenti.length} / {documenti.length}
               </span>
             </div>
 
@@ -412,85 +421,113 @@ function GestioneDocumenti() {
                 Nessun documento trovato
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paziente</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrizione</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Stato</th>
-                      <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-20">Azioni</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {filteredDocumenti.map(doc => (
-                      <tr key={doc.$id} className="hover:bg-gray-50">
-                        <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
-                          <div className="font-medium text-gray-900">{getNomePaziente(doc.patient)}</div>
-                        </td>
-                        <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
-                          <div className="text-sm text-gray-900 truncate max-w-xs" title={doc.description}>
-                            {doc.description}
-                          </div>
-                          {doc.fileName && (
-                            <div className="text-xs text-gray-500 mt-1">{doc.fileName}</div>
-                          )}
-                        </td>
-                        <td className="px-4 py-4 text-center" onClick={e => e.stopPropagation()}>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${doc.status === 'uploaded'
-                            ? 'bg-green-100 text-green-800'
-                            : doc.status === 'upload_failed'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                            {getStatusIcon(doc.status)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-center">
-                          {/* ✅ NUOVO PULSANTE SCARICA */}
-                          <div className="flex items-center space-x-2 justify-center">
-                            <button
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await handleDownload(doc);
-                              }}
-                              disabled={!doc.fileId || doc.status !== 'uploaded'}
-                              className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                              title="Scarica documento"
-                            >
-                              {deleting[doc.$id] ? (
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-700"></div>
-                              ) : (
-                                '⬇️ Scarica'
-                              )}
-                            </button>
-
-                            {/* PULSANTE ELIMINA (invariato) */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(doc.$id, doc.fileId);
-                              }}
-                              disabled={deleting[doc.$id] || doc.status === 'pending_upload'}
-                              className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                              title="Elimina documento"
-                            >
-                              {deleting[doc.$id] ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-700"></div>
-                                  <span>Elim.</span>
-                                </>
-                              ) : (
-                                '🗑️ Elimina'
-                              )}
-                            </button>
-                          </div>
-                        </td>
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paziente</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrizione</th>
+                        <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Stato</th>
+                        <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-20">Azioni</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {currentDocumenti.map(doc => (
+                        <tr key={doc.$id} className="hover:bg-gray-50">
+                          <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
+                            <div className="font-medium text-gray-900">{getNomePaziente(doc.patient)}</div>
+                          </td>
+                          <td className="px-4 py-4" onClick={e => e.stopPropagation()}>
+                            <div className="text-sm text-gray-900 truncate max-w-xs" title={doc.description}>
+                              {doc.description}
+                            </div>
+                            {doc.fileName && (
+                              <div className="text-xs text-gray-500 mt-1">{doc.fileName}</div>
+                            )}
+                          </td>
+                          <td className="px-4 py-4 text-center" onClick={e => e.stopPropagation()}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${doc.status === 'uploaded'
+                              ? 'bg-green-100 text-green-800'
+                              : doc.status === 'upload_failed'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                              {getStatusIcon(doc.status)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <div className="flex items-center space-x-2 justify-center">
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  await handleDownload(doc);
+                                }}
+                                disabled={!doc.fileId || doc.status !== 'uploaded'}
+                                className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                                title="Scarica documento"
+                              >
+                                {deleting[doc.$id] ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-700"></div>
+                                ) : (
+                                  '⬇️ Scarica'
+                                )}
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(doc.$id, doc.fileId);
+                                }}
+                                disabled={deleting[doc.$id] || doc.status === 'pending_upload'}
+                                className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                                title="Elimina documento"
+                              >
+                                {deleting[doc.$id] ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-700"></div>
+                                    <span>Elim.</span>
+                                  </>
+                                ) : (
+                                  '🗑️ Elimina'
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 🔍 CONTROLLI PAGINAZIONE */}
+                {filteredDocumenti.length > docsPerPage && (
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Visualizzati {indexOfFirstDoc + 1}-{Math.min(indexOfLastDoc, filteredDocumenti.length)} di {filteredDocumenti.length} documenti
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Precedente
+                      </button>
+                      <span className="px-3 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-lg">
+                        Pagina {currentPage} di {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Successiva
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

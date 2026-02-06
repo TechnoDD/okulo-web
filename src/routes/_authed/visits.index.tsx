@@ -443,13 +443,11 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                 </button>
                                 <button onClick={() => generaPDF(true)} className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all group shadow-xl" title="Scarica PDF">
                                     <svg className="w-7 h-7 text-white group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
                                         <g id="SVGRepo_bgCarrier" strokeWidth="0" />
-
                                         <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" />
-
-                                        <g id="SVGRepo_iconCarrier"> <path d="M2.21967 2.21967C1.9534 2.48594 1.9292 2.9026 2.14705 3.19621L2.21967 3.28033L6.25424 7.3149C4.33225 8.66437 2.89577 10.6799 2.29888 13.0644C2.1983 13.4662 2.4425 13.8735 2.84431 13.9741C3.24613 14.0746 3.6534 13.8305 3.75399 13.4286C4.28346 11.3135 5.59112 9.53947 7.33416 8.39452L9.14379 10.2043C8.43628 10.9258 8 11.9143 8 13.0046C8 15.2138 9.79086 17.0046 12 17.0046C13.0904 17.0046 14.0788 16.5683 14.8004 15.8608L20.7197 21.7803C21.0126 22.0732 21.4874 22.0732 21.7803 21.7803C22.0466 21.5141 22.0708 21.0974 21.8529 20.8038L21.7803 20.7197L15.6668 14.6055L15.668 14.604L8.71877 7.65782L8.72 7.656L7.58672 6.52549L3.28033 2.21967C2.98744 1.92678 2.51256 1.92678 2.21967 2.21967ZM12 5.5C10.9997 5.5 10.0291 5.64807 9.11109 5.925L10.3481 7.16119C10.8839 7.05532 11.4364 7 12 7C15.9231 7 19.3099 9.68026 20.2471 13.4332C20.3475 13.835 20.7546 14.0794 21.1565 13.9791C21.5584 13.8787 21.8028 13.4716 21.7024 13.0697C20.5994 8.65272 16.6155 5.5 12 5.5ZM12.1947 9.00928L15.996 12.81C15.8942 10.7531 14.2472 9.10764 12.1947 9.00928Z" fill="#ffffff" /> </g>
-
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M2.21967 2.21967C1.9534 2.48594 1.9292 2.9026 2.14705 3.19621L2.21967 3.28033L6.25424 7.3149C4.33225 8.66437 2.89577 10.6799 2.29888 13.0644C2.1983 13.4662 2.4425 13.8735 2.84431 13.9741C3.24613 14.0746 3.6534 13.8305 3.75399 13.4286C4.28346 11.3135 5.59112 9.53947 7.33416 8.39452L9.14379 10.2043C8.43628 10.9258 8 11.9143 8 13.0046C8 15.2138 9.79086 17.0046 12 17.0046C13.0904 17.0046 14.0788 16.5683 14.8004 15.8608L20.7197 21.7803C21.0126 22.0732 21.4874 22.0732 21.7803 21.7803C22.0466 21.5141 22.0708 21.0974 21.8529 20.8038L21.7803 20.7197L15.6668 14.6055L15.668 14.604L8.71877 7.65782L8.72 7.656L7.58672 6.52549L3.28033 2.21967C2.98744 1.92678 2.51256 1.92678 2.21967 2.21967ZM12 5.5C10.9997 5.5 10.0291 5.64807 9.11109 5.925L10.3481 7.16119C10.8839 7.05532 11.4364 7 12 7C15.9231 7 19.3099 9.68026 20.2471 13.4332C20.3475 13.835 20.7546 14.0794 21.1565 13.9791C21.5584 13.8787 21.8028 13.4716 21.7024 13.0697C20.5994 8.65272 16.6155 5.5 12 5.5ZM12.1947 9.00928L15.996 12.81C15.8942 10.7531 14.2472 9.10764 12.1947 9.00928Z" fill="#ffffff" />
+                                        </g>
                                     </svg>
                                 </button>
                                 <button onClick={closeImageViewer} className="w-14 h-14 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all" title="Chiudi">
@@ -461,12 +459,29 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                         </div>
 
                         <div className="flex-1 flex flex-col p-8 space-y-6 overflow-auto">
-                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4">
-                                <img src={selectedPair.img1Src} alt={selectedPair.alt} className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50" />
+                            {/* PRIMA IMMAGINE - O. S. */}
+                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4 relative">
+                                <img
+                                    src={selectedPair.img1Src}
+                                    alt="O. S."
+                                    className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50"
+                                />
+                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-1.5 rounded-xl font-bold text-lg border-2 border-white/70 shadow-2xl z-20 whitespace-nowrap">
+                                    O. S.
+                                </div>
                             </div>
                             <div className="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent mx-8"></div>
-                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4">
-                                <img src={selectedPair.img2Src} alt={selectedPair.alt} className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50" />
+
+                            {/* SECONDA IMMAGINE - O. D. */}
+                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4 relative">
+                                <img
+                                    src={selectedPair.img2Src}
+                                    alt="O.D."
+                                    className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50"
+                                />
+                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-1.5 rounded-xl font-bold text-lg border-2 border-white/70 shadow-2xl z-20 whitespace-nowrap">
+                                    O. D.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -487,6 +502,10 @@ function GestioneVisite() {
     const [soloPazienteSelezionato, setSoloPazienteSelezionato] = useState(false);
     const [isImmaginiModaleOpen, setIsImmaginiModaleOpen] = useState(false);
     const [visitaSelezionata, setVisitaSelezionata] = useState(null);
+
+    // 🔍 PAGINAZIONE - Nuovi stati
+    const [currentPage, setCurrentPage] = useState(1);
+    const visitsPerPage = 3;
 
     useEffect(() => {
         const paziente = routerState.location.state?.paziente;
@@ -589,6 +608,12 @@ function GestioneVisite() {
         return matchSearch && matchPaziente;
     });
 
+    // 🔍 LOGICA PAGINAZIONE
+    const indexOfLastVisit = currentPage * visitsPerPage;
+    const indexOfFirstVisit = indexOfLastVisit - visitsPerPage;
+    const currentVisite = filteredVisite.slice(indexOfFirstVisit, indexOfLastVisit);
+    const totalPages = Math.ceil(filteredVisite.length / visitsPerPage);
+
     const getfirstNamePaziente = (patient) => {
         if (typeof patient === 'object' && patient.patientData) {
             return `${patient.patientData.firstName} ${patient.patientData.lastName}`;
@@ -670,14 +695,13 @@ function GestioneVisite() {
                                     <select name="status" value={formData.status} onChange={handleChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
                                         <option value="SCHEDULED">Programmata</option>
-                                        {/* <option value="COMPLETED">Completata</option> */}
                                         <option value="CANCELLED">Annullata</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">reason *</label>
-                                <input type="text" name="reason" value={formData.reason} onChange={handleChange} required
+                                <input type="text" name="reason" value={formData.reason} onChange={handleChange}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500" />
                             </div>
                             <div>
@@ -700,7 +724,7 @@ function GestioneVisite() {
                         </form>
                     </div>
 
-                    {/* LISTA VISITE */}
+                    {/* LISTA VISITE CON PAGINAZIONE */}
                     <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
                         <div className="flex items-center justify-between mb-8">
                             <h2 className="text-2xl font-bold text-gray-900 flex items-center">
@@ -712,7 +736,7 @@ function GestioneVisite() {
                                 Elenco Visite
                             </h2>
                             <div className="text-sm font-semibold text-gray-700 bg-emerald-100 px-4 py-2 rounded-xl">
-                                {filteredVisite.length} / {visite.length}
+                                {currentVisite.length} / {visite.length}
                             </div>
                         </div>
 
@@ -738,60 +762,86 @@ function GestioneVisite() {
                                 <p className="text-gray-500">Aggiungi la prima visita o modifica i filtri</p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Paziente</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Data</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Motivo</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stato</th>
-                                            <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Azioni</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {filteredVisite.map((visita) => (
-                                            <tr key={visita.$id} className="hover:bg-gray-50">
-                                                <td className="px-4 py-4 font-medium text-gray-900">
-                                                    {getfirstNamePaziente(visita.patient)}
-                                                </td>
-                                                <td className="px-4 py-4 text-gray-700">
-                                                    {new Date(visita.visitDate).toLocaleDateString() || '-'}
-                                                </td>
-                                                <td className="px-4 py-4 text-gray-700 max-w-xs truncate" title={visita.reason}>
-                                                    {visita.reason}
-                                                </td>
-                                                <td className="px-4 py-4">
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getstatusBadge(visita.status)}`}>
-                                                        {visita.status === 'SCHEDULED' ? '⏰ Program.' :
-                                                            visita.status === 'COMPLETED' ? '✅ Comp.' : '❌ Annull.'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-4 text-right space-x-2">
-                                                    <button
-                                                        onClick={() => handleOpenImmagini(visita)}
-                                                        className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-lg hover:bg-purple-200 flex items-center space-x-1"
-                                                        title="Visualizza immagini"
-                                                    >
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        <span>Immagini</span>
-                                                    </button>
-                                                    <button onClick={() => handleEdit(visita)}
-                                                        className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-lg hover:bg-emerald-200">
-                                                        Modifica
-                                                    </button>
-                                                    {/* <button onClick={() => handleDelete(visita.$id)}
-                                                        className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-lg hover:bg-red-200">
-                                                        Elimina
-                                                    </button> */}
-                                                </td>
+                            <>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="bg-gray-50">
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Paziente</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Data</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Motivo</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stato</th>
+                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Azioni</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {currentVisite.map((visita) => (
+                                                <tr key={visita.$id} className="hover:bg-gray-50">
+                                                    <td className="px-4 py-4 font-medium text-gray-900">
+                                                        {getfirstNamePaziente(visita.patient)}
+                                                    </td>
+                                                    <td className="px-4 py-4 text-gray-700">
+                                                        {new Date(visita.visitDate).toLocaleDateString() || '-'}
+                                                    </td>
+                                                    <td className="px-4 py-4 text-gray-700 max-w-xs truncate" title={visita.reason}>
+                                                        {visita.reason}
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getstatusBadge(visita.status)}`}>
+                                                            {visita.status === 'SCHEDULED' ? '⏰ Program.' :
+                                                                visita.status === 'COMPLETED' ? '✅ Comp.' : '❌ Annull.'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-right space-x-2">
+                                                        <button
+                                                            onClick={() => handleOpenImmagini(visita)}
+                                                            className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-lg hover:bg-purple-200 flex items-center space-x-1"
+                                                            title="Visualizza immagini"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                            <span>Immagini</span>
+                                                        </button>
+                                                        <button onClick={() => handleEdit(visita)}
+                                                            className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-lg hover:bg-emerald-200">
+                                                            Modifica
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* 🔍 CONTROLLI PAGINAZIONE */}
+                                {filteredVisite.length > visitsPerPage && (
+                                    <div className="mt-6 flex items-center justify-between">
+                                        <div className="text-sm text-gray-700">
+                                            Visualizzati {indexOfFirstVisit + 1}-{Math.min(indexOfLastVisit, filteredVisite.length)} di {filteredVisite.length} visite
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentPage === 1}
+                                                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                Precedente
+                                            </button>
+                                            <span className="px-3 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-lg">
+                                                Pagina {currentPage} di {totalPages}
+                                            </span>
+                                            <button
+                                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                                disabled={currentPage === totalPages}
+                                                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                Successiva
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         <ImmaginiModale
@@ -805,7 +855,6 @@ function GestioneVisite() {
         </div>
     );
 }
-
 
 export default function GestioneVisiteWrapper() {
     return (
