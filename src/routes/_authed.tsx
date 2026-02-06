@@ -2,15 +2,10 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Outlet, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authed')({
-  // beforeLoad: async ({ context }) => {
-  //   try {
-  //     const { getUser } = context.authentication;
-  //     const user = await getUser();
-  //     return { user }
-  //   } catch (err) {
-  //     throw redirect({ to: "/login" });
-  //   }
-  // },
+  beforeLoad: async ({ context }) => {
+    // const user = await context.fetchUser()
+    // if (!user) throw redirect({ to: '/login' })
+  },
   component: AuthenticatedLayout
 })
 
@@ -34,12 +29,17 @@ function AuthenticatedLayout() {
       <nav className="bg-white shadow-xl border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            {/* Logo quadrato sinistra */}
+            <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" aria-label="Logo spazio riservato">
+              {/* Spazio per logo quadrato */}
+            </div>
+
             {/* Menu Links (centro) */}
             <ul className="flex space-x-6 mx-auto">
               <li>
                 <Link
                   to="/patients"
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-200 transition-all duration-200"
+                  className="px-6 py-3 bg-gradient-to-r from-[#0c5baa] to-[#0a4a8a] text-white font-semibold rounded-xl shadow-lg hover:from-[#0a4a8a] hover:to-[#08407a] focus:ring-4 focus:ring-[#0c5baa]/20 transition-all duration-200"
                 >
                   Pazienti
                 </Link>
@@ -47,7 +47,7 @@ function AuthenticatedLayout() {
               <li>
                 <Link
                   to="/visits"
-                  className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:from-emerald-600 hover:to-emerald-700 focus:ring-4 focus:ring-emerald-200 transition-all duration-200"
+                  className="px-6 py-3 bg-gradient-to-r from-[#48b671] to-[#3da861] text-white font-semibold rounded-xl shadow-lg hover:from-[#3da861] hover:to-[#329c51] focus:ring-4 focus:ring-[#48b671]/20 transition-all duration-200"
                 >
                   Visite
                 </Link>
@@ -55,7 +55,7 @@ function AuthenticatedLayout() {
               <li>
                 <Link
                   to="/documents"
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:from-purple-600 hover:to-purple-700 focus:ring-4 focus:ring-purple-200 transition-all duration-200"
+                  className="px-6 py-3 bg-gradient-to-r from-[#9e427a] to-[#8e3a6a] text-white font-semibold rounded-xl shadow-lg hover:from-[#8e3a6a] hover:to-[#7e325a] focus:ring-4 focus:ring-[#9e427a]/20 transition-all duration-200"
                 >
                   Documenti
                 </Link>
@@ -99,8 +99,16 @@ function AuthenticatedLayout() {
         </div>
       </nav>
 
-      {/* Contenuto delle pagine */}
-      <Outlet />
+      {/* Contenuto delle pagine - SOLO immagine background */}
+      <div className="min-h-screen pt-4 relative">
+        <div
+          className="fixed inset-0 bg-[url('/medical-bg.png')] bg-cover bg-center bg-no-repeat z-0 opacity-10"
+        />
+        <div className="relative z-10 min-h-screen">
+          <Outlet />
+        </div>
+      </div>
     </>
+
   )
 }

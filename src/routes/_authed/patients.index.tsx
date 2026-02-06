@@ -63,10 +63,10 @@ function GestionePazienti() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName) {
-      alert("Nome e Cognome sono obbligatori");
-      return;
-    }
+    // if (!formData.firstName || !formData.lastName) {
+    //   alert("Nome e Cognome sono obbligatori");
+    //   return;
+    // }
     setLoading(true);
 
     try {
@@ -128,24 +128,38 @@ function GestionePazienti() {
   const totalPages = Math.ceil(filteredPazienti.length / patientsPerPage);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            Gestione Pazienti
-          </h1>
-          <p className="text-xl text-gray-600">
-            {pazienteSelezionato
-              ? `Gestendo: ${pazienteSelezionato.firstName} ${pazienteSelezionato.lastName}`
-              : "Inserisci, modifica ed elimina i pazienti"
-            }
-          </p>
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-4">
+              <img
+                src="/b_arrow.png"
+                alt="Logo"
+                className="w-8 h-8 flex-shrink-0"
+                aria-label="Logo"
+              />
+              <div className="flex flex-col items-start">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0c5baa] to-[#0c5baa] bg-clip-text text-transparent">
+                  Gestione Pazienti
+                </h1>
+                <p className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#0c5baa] to-[#0c5baa] italic">
+                  {pazienteSelezionato
+                    ? `Gestendo: ${pazienteSelezionato.firstName} ${pazienteSelezionato.lastName}`
+                    : "Inserisci, modifica ed elimina i pazienti"}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {pazienteSelezionato && (
             <div className="mt-4 p-3 bg-blue-100 border border-blue-200 rounded-xl max-w-md mx-auto">
-              <p className="text-xl font-semibold text-blue-800">
+              <p className="text-xl font-semibold text-[#0c5baa]">
                 👤 {pazienteSelezionato.firstName} {pazienteSelezionato.lastName}
               </p>
-              <p className="text-sm text-blue-700">CF: {pazienteSelezionato.fiscalCode}</p>
+              <p className="text-sm text-[#0c5baa]">
+                CF: {pazienteSelezionato.fiscalCode}
+              </p>
             </div>
           )}
         </div>
@@ -175,7 +189,7 @@ function GestionePazienti() {
                       name="$id"
                       value={formData.$id.toString().toUpperCase()}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                       required
                     />
                   </div>)}
@@ -188,8 +202,7 @@ function GestionePazienti() {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                   />
                 </div>
 
@@ -201,8 +214,7 @@ function GestionePazienti() {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                   />
                 </div>
 
@@ -216,7 +228,7 @@ function GestionePazienti() {
                     onChange={handleChange}
                     min="0"
                     max="120"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                   />
                 </div>
 
@@ -227,8 +239,7 @@ function GestionePazienti() {
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                   >
                     <option value="">Seleziona...</option>
                     <option value="M">Maschio</option>
@@ -245,7 +256,8 @@ function GestionePazienti() {
                     name="birthDate"
                     value={formData.birthDate}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
+                    required
                   />
                 </div>
 
@@ -257,7 +269,7 @@ function GestionePazienti() {
                     name="fiscalCode"
                     value={formData.fiscalCode}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                     maxLength="16"
                   />
                 </div>
@@ -276,7 +288,7 @@ function GestionePazienti() {
                           newPathologies[index] = e.target.value;
                           setFormData({ ...formData, pathologies: newPathologies });
                         }}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                       >
                         <option value="">Seleziona una patologia...</option>
                         <option value="Ipertensione">Ipertensione</option>
@@ -308,7 +320,7 @@ function GestionePazienti() {
                     const newPathologies = [...(formData.pathologies || []), ''];
                     setFormData({ ...formData, pathologies: newPathologies });
                   }}
-                  className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-xl transition-all duration-200"
+                  className="mt-3 flex items-center gap-2 px-4 py-2 bg-[#0c5baa] hover:bg-[#0a4a8a] text-white text-sm font-medium rounded-xl transition-all duration-200"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -322,7 +334,7 @@ function GestionePazienti() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 bg-gradient-to-r from-[#0c5baa] to-[#0a4a8a] text-white py-3 px-6 rounded-xl font-semibold shadow-lg hover:from-[#0a4a8a] hover:to-[#08407a] focus:ring-4 focus:ring-[#0c5baa]/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {loading ? 'Salvando...' : (isEditing ? "Aggiorna" : "Aggiungi")}
                 </button>
@@ -350,7 +362,7 @@ function GestionePazienti() {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Elenco Pazienti</h2>
               </div>
-              <div className="text-sm font-semibold text-gray-700 bg-blue-100 px-3 py-1 rounded-full">
+              <div className="text-sm font-semibold text-gray-700 bg-[#0c5baa]/10 px-3 py-1 rounded-full">
                 {currentPatients.length} / {pazienti.length}
               </div>
             </div>
@@ -364,7 +376,7 @@ function GestionePazienti() {
                 </div>
                 <input type="text" placeholder="Cerca per firstName, lastName o codice fiscale..."
                   value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50" />
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] bg-gray-50" />
               </div>
             </div>
 
@@ -388,7 +400,7 @@ function GestionePazienti() {
                       <td className="px-6 py-4 text-gray-700">{paziente.fiscalCode}</td>
                       <td className="px-6 py-4 space-x-2">
                         <button onClick={() => handleEdit(paziente)}
-                          className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-md hover:bg-blue-200">
+                          className="px-3 py-1 bg-[#0c5baa]/10 text-[#0c5baa] text-xs rounded-md hover:bg-[#0c5baa]/20">
                           Modifica
                         </button>
                         <button onClick={() => navigaConPaziente(paziente, "/visits")}
