@@ -85,13 +85,13 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
 
     // Nomi dei 7 gruppi
     const nomiGruppi = [
-        "Completo",
-        "Paresi Retto inferiore Dx",
-        "Paresi Retto laterale Sx",
-        "Paresi Retto mediale Sx",
-        "Paresi Retto superiore Dx",
-        "Paresi Obq. inferiore Dx",
-        "Paresi Obq. superiore Dx"
+        "Confronto completo",
+        "Confronto paresi Retto inferiore Dx",
+        "Confronto paresi Retto laterale Sx",
+        "Confronto paresi Retto mediale Sx",
+        "Confronto paresi Retto superiore Dx",
+        "Confronto paresi Obq. inferiore Dx",
+        "Confronto paresi Obq. superiore Dx"
     ];
 
     // Nomi specifici per le COPPIE
