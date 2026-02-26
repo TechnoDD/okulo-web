@@ -66,6 +66,13 @@ export const deleteVisit = createServerFn().handler(async ({ data }) => {
 })
 
 export const Route = createFileRoute('/_authed/visits/')({
+    head: () => ({
+        meta: [
+            {
+                title: 'ViRgo - Gestione Visite',
+            },
+        ],
+    }),
     component: GestioneVisiteWrapper,
 })
 
@@ -223,9 +230,18 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
             color: rgb(0.2, 0.2, 0.6)
         });
 
+        // LOGO
+        const pngImageBytes = await fetch('/logo.png').then((res) => res.arrayBuffer())
+        const logo = await pdfDoc.embedPng(pngImageBytes)
+        page.drawImage(logo, {
+            x: 50,
+            y: 548,
+            width: 24,
+            height: 24
+        })
         // TITOLO abbassato per le immagini più grandi
         page.drawText("SCHERMO DI HESS", {
-            x: 50,
+            x: 80,
             y: 550,
             size: 28,
             font: helveticaBoldFont,

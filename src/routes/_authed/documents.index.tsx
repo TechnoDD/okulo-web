@@ -69,6 +69,13 @@ export const getDownloadUrl = createServerFn().handler(async ({ data }) => {
 });
 
 export const Route = createFileRoute('/_authed/documents/')({
+  head: () => ({
+    meta: [
+      {
+        title: 'ViRgo - Gestione Documenti',
+      },
+    ],
+  }),
   component: GestioneDocumentiWrapper,
 });
 

@@ -13,11 +13,11 @@ function AuthenticatedLayout() {
   // Funzione per il download del PDF dalla cartella public/
   const handleDownloadPDF = () => {
     // ✅ MODIFICA QUI: sostituisci con il nome esatto del tuo file PDF
-    const pdfUrl = '/guida.pdf'; // Es: '/contratto.pdf', '/documenti/manuale.pdf'
+    const pdfUrl = '/260219_Guida_VIRGO.pdf'; // Es: '/contratto.pdf', '/documenti/manuale.pdf'
 
     const link = document.createElement('a');
     link.href = pdfUrl;
-    link.download = 'guida.pdf'; // Nome del file al download
+    link.download = '260219_Guida_VIRGO.pdf'; // Nome del file al download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -30,8 +30,12 @@ function AuthenticatedLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo quadrato sinistra */}
-            <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0" aria-label="Logo spazio riservato">
-              {/* Spazio per logo quadrato */}
+            <div className="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0">
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-full h-full object-cover rounded-lg"
+              />
             </div>
 
             {/* Menu Links (centro) */}

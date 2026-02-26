@@ -17,6 +17,13 @@ export const deletePatient = createServerFn().handler(async ({ data }) => {
 })
 
 export const Route = createFileRoute('/_authed/patients/')({
+  head: () => ({
+    meta: [
+      {
+        title: 'ViRgo - Gestione Pazienti',
+      },
+    ],
+  }),
   component: GestionePazientiWrapper,
 })
 
