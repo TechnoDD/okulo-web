@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { tablesDB } from "@/utils/appwrite";
+import { tablesDB, Query } from "@/utils/appwrite";
 import { createServerFn } from "@tanstack/react-start";
 
 export const getPatients = createServerFn().handler(async () => {
-  return await tablesDB.listRows(import.meta.env.VITE_APPWRITE_OKULO_DB_ID, import.meta.env.VITE_APPWRITE_PATIENTS_TABLE_ID);
+  return await tablesDB.listRows(import.meta.env.VITE_APPWRITE_OKULO_DB_ID, import.meta.env.VITE_APPWRITE_PATIENTS_TABLE_ID, [Query.limit(5000)]);
 })
 
 const PazienteContext = createContext(null);

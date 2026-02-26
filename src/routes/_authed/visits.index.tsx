@@ -9,7 +9,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 export const getVisits = createServerFn().handler(async ({ data }) => {
     const { patientId } = data;
-    const query = [Query.orderDesc('$createdAt')];
+    const query = [Query.orderDesc('$createdAt'), Query.limit(5000)];
     if (patientId) query.push(Query.equal('patient', patientId))
     return await tablesDB.listRows(import.meta.env.VITE_APPWRITE_OKULO_DB_ID, import.meta.env.VITE_APPWRITE_VISITS_TABLE_ID, query);
 })

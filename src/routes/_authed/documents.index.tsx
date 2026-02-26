@@ -6,7 +6,7 @@ import { tablesDB, storage, ID, Query } from '@/utils/appwrite';
 
 export const getAttachments = createServerFn().handler(async ({ data }) => {
   const { patientId } = data;
-  const query = [];
+  const query = [Query.limit(5000)];
   if (patientId) query.push(Query.equal('patient', patientId))
   return await tablesDB.listRows(import.meta.env.VITE_APPWRITE_OKULO_DB_ID, import.meta.env.VITE_APPWRITE_ATTACHMENTS_TABLE_ID, query);
 })
