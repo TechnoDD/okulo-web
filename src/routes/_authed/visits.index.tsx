@@ -193,14 +193,14 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         ]);
 
         // ETICHETTE SOPRA (adattate alla nuova dimensione)
-        page.drawText("O. S.", {
+        page.drawText("O. D.", {
             x: centerX + (imgSize - 40) / 2,
             y: 500,
             size: 16,
             font: helveticaBoldFont,
             color: rgb(0, 0.6, 0)
         });
-        page.drawText("O. D.", {
+        page.drawText("O. S.", {
             x: centerX + imgSize + 40 + (imgSize - 40) / 2,
             y: 500,
             size: 16,
@@ -213,16 +213,16 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         page.drawImage(img2Data.image, { x: centerX + imgSize + 40, y: imgY, width: imgSize, height: imgSize });
 
         // ETICHETTE IN BASSO (adattate)
-        const label1Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. S.", 11);
-        const label2Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. D.", 11);
-        page.drawText("Verde davanti all'O. S.", {
+        const label1Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. D.", 11);
+        const label2Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. S.", 11);
+        page.drawText("Verde davanti all'O. D.", {
             x: centerX + (imgSize - label1Width) / 2,
             y: imgY - 25,
             size: 11,
             font: helveticaFont,
             color: rgb(0.2, 0.2, 0.6)
         });
-        page.drawText("Verde davanti all'O. D.", {
+        page.drawText("Verde davanti all'O. S.", {
             x: centerX + imgSize + 40 + (imgSize - label2Width) / 2,
             y: imgY - 25,
             size: 11,
@@ -481,11 +481,11 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                             <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4 relative">
                                 <img
                                     src={selectedPair.img1Src}
-                                    alt="O. S."
+                                    alt="O. D."
                                     className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50"
                                 />
                                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-1.5 rounded-xl font-bold text-lg border-2 border-white/70 shadow-2xl z-20 whitespace-nowrap">
-                                    O. S.
+                                    O. D.
                                 </div>
                             </div>
                             <div className="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent mx-8"></div>
@@ -494,11 +494,11 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                             <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4 relative">
                                 <img
                                     src={selectedPair.img2Src}
-                                    alt="O.D."
+                                    alt="O.S."
                                     className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50"
                                 />
                                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-1.5 rounded-xl font-bold text-lg border-2 border-white/70 shadow-2xl z-20 whitespace-nowrap">
-                                    O. D.
+                                    O. S.
                                 </div>
                             </div>
                         </div>
