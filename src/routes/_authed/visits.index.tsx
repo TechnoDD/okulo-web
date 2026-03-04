@@ -209,8 +209,8 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         });
 
         // Immagini più grandi (20% più grandi)
-        page.drawImage(img1Data.image, { x: centerX, y: imgY, width: imgSize, height: imgSize });
-        page.drawImage(img2Data.image, { x: centerX + imgSize + 40, y: imgY, width: imgSize, height: imgSize });
+        page.drawImage(img1Data.image, { x: 15, y: 220, width: 520 / 1.3, height: 270 / 1.3 });
+        page.drawImage(img2Data.image, { x: 520 / 1.3 + 25, y: 220, width: 520 / 1.3, height: 270 / 1.3 });
 
         // ETICHETTE IN BASSO (adattate)
         const label1Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. D.", 11);
@@ -297,12 +297,12 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         });
 
         const canvas = document.createElement('canvas');
-        canvas.width = 2048;
+        canvas.width = 4096;
         canvas.height = 2048;
         const ctx = canvas.getContext('2d');
-        const cropX = 2048;
+        const cropX = 1024;
         const cropY = 0;
-        const cropWidth = 2048;
+        const cropWidth = 4096;
         const cropHeight = 2048;
 
         ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
