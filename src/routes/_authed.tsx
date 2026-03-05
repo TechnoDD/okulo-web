@@ -13,11 +13,11 @@ function AuthenticatedLayout() {
   // Funzione per il download del PDF dalla cartella public/
   const handleDownloadPDF = () => {
     // ✅ MODIFICA QUI: sostituisci con il nome esatto del tuo file PDF
-    const pdfUrl = '/260219_Guida_VIRGO.pdf'; // Es: '/contratto.pdf', '/documenti/manuale.pdf'
+    const pdfUrl = '/260305_Guida_VIRGO.pdf'; // Es: '/contratto.pdf', '/documenti/manuale.pdf'
 
     const link = document.createElement('a');
     link.href = pdfUrl;
-    link.download = '260219_Guida_VIRGO.pdf'; // Nome del file al download
+    link.download = '260305_Guida_VIRGO.pdf'; // Nome del file al download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
