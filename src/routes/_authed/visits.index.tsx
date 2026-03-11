@@ -193,14 +193,14 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         ]);
 
         // ETICHETTE SOPRA (adattate alla nuova dimensione)
-        page.drawText("O. D.", {
+        page.drawText("O. S.", {
             x: centerX + (imgSize - 40) / 2,
             y: 500,
             size: 16,
             font: helveticaBoldFont,
             color: rgb(0, 0.6, 0)
         });
-        page.drawText("O. S.", {
+        page.drawText("O. D.", {
             x: centerX + imgSize + 40 + (imgSize - 40) / 2,
             y: 500,
             size: 16,
@@ -209,20 +209,20 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         });
 
         // Immagini più grandi (20% più grandi)
-        page.drawImage(img1Data.image, { x: 15, y: 220, width: 520 / 1.3, height: 270 / 1.3 });
-        page.drawImage(img2Data.image, { x: 520 / 1.3 + 25, y: 220, width: 520 / 1.3, height: 270 / 1.3 });
+        page.drawImage(img2Data.image, { x: 15, y: 220, width: 520 / 1.3, height: 270 / 1.3 });
+        page.drawImage(img1Data.image, { x: 520 / 1.3 + 25, y: 220, width: 520 / 1.3, height: 270 / 1.3 });
 
         // ETICHETTE IN BASSO (adattate)
-        const label1Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. D.", 11);
-        const label2Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. S.", 11);
-        page.drawText("Verde davanti all'O. D.", {
+        const label1Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. S.", 11);
+        const label2Width = helveticaFont.widthOfTextAtSize("Verde davanti all'O. D.", 11);
+        page.drawText("Verde davanti all'O. S.", {
             x: centerX + (imgSize - label1Width) / 2,
             y: imgY - 25,
             size: 11,
             font: helveticaFont,
             color: rgb(0.2, 0.2, 0.6)
         });
-        page.drawText("Verde davanti all'O. S.", {
+        page.drawText("Verde davanti all'O. D.", {
             x: centerX + imgSize + 40 + (imgSize - label2Width) / 2,
             y: imgY - 25,
             size: 11,
@@ -388,14 +388,14 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                                     {/* ✅ ANTEPRIMA IMG1 E IMG2 - LAYOUT ORIZZONTALE */}
                                                     <div className="w-full h-32 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-xl overflow-hidden flex items-center justify-center mb-3 mx-auto">
                                                         <img
-                                                            src={pulsante.img1Src}
+                                                            src={pulsante.img2Src}
                                                             alt={`${pulsante.alt} - 1`}
                                                             className="w-1/2 h-full object-cover"
                                                             loading="lazy"
                                                         />
                                                         <div className="w-px h-20 bg-gradient-to-b from-white/50 to-transparent mx-2"></div>
                                                         <img
-                                                            src={pulsante.img2Src}
+                                                            src={pulsante.img1Src}
                                                             alt={`${pulsante.alt} - 2`}
                                                             className="w-1/2 h-full object-cover"
                                                             loading="lazy"
@@ -438,7 +438,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
             {/* VIEWER COPPIA */}
             {selectedPair && (
                 <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={closeImageViewer}>
-                    <div className="max-w-4xl max-h-[90vh] w-full h-full flex flex-col bg-white/10 backdrop-blur-sm rounded-3xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="max-w-full max-h-[90vh] w-full h-full flex flex-col bg-white/10 backdrop-blur-sm rounded-3xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-6 border-b border-white/30 rounded-t-3xl">
                             <div className="flex items-center space-x-3">
                                 <button onClick={closeImageViewer} className="w-14 h-14 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-3xl flex items-center justify-center transition-all group">
@@ -476,32 +476,34 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                             </div>
                         </div>
 
-                        <div className="flex-1 flex flex-col p-8 space-y-6 overflow-auto">
+                        <div className="grid grid-cols-[1fr_1fr] gap-6 p-8 overflow-auto h-full">
                             {/* PRIMA IMMAGINE - O. S. */}
-                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4 relative">
-                                <img
-                                    src={selectedPair.img1Src}
-                                    alt="O. D."
-                                    className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50"
-                                />
-                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-1.5 rounded-xl font-bold text-lg border-2 border-white/70 shadow-2xl z-20 whitespace-nowrap">
-                                    O. D.
-                                </div>
-                            </div>
-                            <div className="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent mx-8"></div>
-
-                            {/* SECONDA IMMAGINE - O. D. */}
-                            <div className="flex-1 flex items-center justify-center bg-white/20 rounded-2xl p-4 relative">
+                            <div className="grid place-items-center bg-white/20 rounded-2xl p-4 relative">
                                 <img
                                     src={selectedPair.img2Src}
-                                    alt="O.S."
+                                    alt="O. S."
                                     className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50"
                                 />
                                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-1.5 rounded-xl font-bold text-lg border-2 border-white/70 shadow-2xl z-20 whitespace-nowrap">
                                     O. S.
                                 </div>
                             </div>
+
+                            {/* <div className="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent mx-8 self-center"></div> */}
+
+                            {/* SECONDA IMMAGINE - O. D. */}
+                            <div className="grid place-items-center bg-white/20 rounded-2xl p-4 relative">
+                                <img
+                                    src={selectedPair.img1Src}
+                                    alt="O.D."
+                                    className="max-w-full max-h-full object-contain rounded-xl shadow-2xl border-4 border-white/50"
+                                />
+                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black/90 text-white px-4 py-1.5 rounded-xl font-bold text-lg border-2 border-white/70 shadow-2xl z-20 whitespace-nowrap">
+                                    O. D.
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             )}
