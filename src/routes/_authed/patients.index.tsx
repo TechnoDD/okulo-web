@@ -381,7 +381,7 @@ function GestionePazienti() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <input type="text" placeholder="Cerca per firstName, lastName o codice fiscale..."
+                <input type="text" placeholder="Cerca per nome, cognome o codice fiscale..."
                   value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] bg-gray-50" />
               </div>

@@ -137,12 +137,11 @@ function GestioneDocumenti() {
 
   useEffect(() => {
     const paziente = routerState.location.state?.paziente;
-    if (paziente && pazienti.length > 0) {
+    if (paziente) {
       setPazienteSelezionato(paziente);
-    } else {
-      setPazienteSelezionato(null);
+      setSoloPazienteSelezionato(true)
     }
-  }, [pazienti]);
+  }, []);
 
   const fetchAttachments = async (patientId?: string) => {
     const attachments = await getAttachments({ data: { patientId } });
@@ -150,12 +149,15 @@ function GestioneDocumenti() {
   };
 
   useEffect(() => {
-    if (pazienteSelezionato && soloPazienteSelezionato) {
-      fetchAttachments(pazienteSelezionato.$id);
+    if (soloPazienteSelezionato) {
+      if (pazienteSelezionato)
+        fetchAttachments(pazienteSelezionato.$id);
     } else {
       fetchAttachments();
     }
-  }, [pazienteSelezionato, soloPazienteSelezionato]);
+
+    setCurrentPage(1)
+  }, [soloPazienteSelezionato]);
 
   // Pre-compila form con paziente selezionato
   useEffect(() => {

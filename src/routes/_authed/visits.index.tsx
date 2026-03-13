@@ -530,12 +530,11 @@ function GestioneVisite() {
     useEffect(() => {
         const paziente = routerState.location.state?.paziente;
 
-        if (paziente && pazienti.length > 0) {
+        if (paziente) {
             setPazienteSelezionato(paziente);
-        } else {
-            setPazienteSelezionato(null);
+            setSoloPazienteSelezionato(true)
         }
-    }, [pazienti]);
+    }, []);
 
     useEffect(() => {
         async function fetchVisits(patientId = '') {
@@ -550,12 +549,15 @@ function GestioneVisite() {
             setVisite(visitsConPaziente);
         }
 
-        if (pazienteSelezionato && soloPazienteSelezionato) {
-            fetchVisits(pazienteSelezionato.$id);
+        if (soloPazienteSelezionato) {
+            if (pazienteSelezionato)
+                fetchVisits(pazienteSelezionato.$id);
         } else {
             fetchVisits();
         }
-    }, [pazienteSelezionato, soloPazienteSelezionato, pazienti]);
+
+        setCurrentPage(1)
+    }, [soloPazienteSelezionato]);
 
     useEffect(() => {
         if (pazienteSelezionato && !isEditing) {
@@ -617,10 +619,14 @@ function GestioneVisite() {
     };
 
     const filteredVisite = visite.filter(visita => {
+        const p = pazienti.find(p => p.$id === visita.patient);
+        const paziente = p ? `${p.firstName} ${p.lastName}` : `Paziente #${visita.patient}`;
+
         const matchSearch =
             !searchTerm ||
-            visita.reason.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            visita.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            // visita.reason.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            // visita.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            paziente.toLowerCase().includes(searchTerm.toLowerCase()) ||
             visita.visitDate.includes(searchTerm);
 
         const matchPaziente = !soloPazienteSelezionato || visita.patient === pazienteSelezionato?.$id;
@@ -679,7 +685,7 @@ function GestioneVisite() {
                     </div>
 
                     {pazienteSelezionato && (
-                        <div className="mt-4 p-3 bg-green-100 border border-green-200 rounded-xl max-w-md mx-auto">
+                        <div className="mt-4 mb-6 p-4 bg-green-100 border border-green-200 rounded-2xl max-w-2xl mx-auto">
                             <p className="text-xl font-semibold text-[#48b671]">
                                 👤 {pazienteSelezionato.firstName} {pazienteSelezionato.lastName}
                             </p>
