@@ -129,7 +129,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
 
     // Genera 21 pulsanti raggruppati in 7 gruppi
     const gruppiPulsanti = [];
-    const numGruppi = 7;
+    const numGruppi = nomiGruppi.length;
 
     for (let gruppoIndex = 0; gruppoIndex < numGruppi; gruppoIndex++) {
         const pulsantiGruppo = [];
