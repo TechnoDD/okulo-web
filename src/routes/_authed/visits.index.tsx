@@ -385,7 +385,6 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                         <div className="flex items-center mb-6 pb-4 border-b border-purple-200">
                                             <div className="w-12 h-16 bg-gradient-to-r from-red-500 to-green-500 rounded-2xl flex flex-col items-center justify-center mr-4 shadow-lg p-2">
                                                 <span className="text-lg font-bold text-white">{gruppoIndex + 1}</span>
-                                                <span className="text-xs text-white/90 font-medium">di 7</span>
                                             </div>
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-900">{gruppo.nome}</h3>
