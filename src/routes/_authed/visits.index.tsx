@@ -93,12 +93,18 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
     // Nomi dei 7 gruppi
     const nomiGruppi = [
         "Confronto completo",
+        "Confronto paresi Retto inferiore Sx",
         "Confronto paresi Retto inferiore Dx",
         "Confronto paresi Retto laterale Sx",
+        "Confronto paresi Retto laterale Dx",
         "Confronto paresi Retto mediale Sx",
+        "Confronto paresi Retto mediale Dx",
+        "Confronto paresi Retto superiore Sx",
         "Confronto paresi Retto superiore Dx",
+        "Confronto paresi Obq. inferiore Sx",
         "Confronto paresi Obq. inferiore Dx",
-        "Confronto paresi Obq. superiore Dx"
+        "Confronto paresi Obq. superiore Sx",
+        "Confronto paresi Obq. superiore Dx",
     ];
 
     // Nomi specifici per le COPPIE
@@ -106,13 +112,19 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
 
     // ORGANIZZAZIONE COPPIE PER GRUPPO
     const organizzazioneCoppie = [
-        [[0, 7], [14, 21], [28, 35]],
-        [[1, 8], [15, 22], [29, 36]],
-        [[2, 9], [16, 23], [30, 37]],
-        [[3, 10], [17, 24], [31, 38]],
-        [[4, 11], [18, 25], [32, 39]],
-        [[5, 12], [19, 26], [33, 40]],
-        [[6, 13], [20, 27], [34, 41]]
+        [[0, 13], [26, 39], [52, 65]],
+        [[1, 14], [27, 40], [53, 66]],
+        [[2, 15], [28, 41], [54, 67]],
+        [[3, 16], [29, 42], [55, 68]],
+        [[4, 17], [30, 43], [56, 69]],
+        [[5, 18], [31, 44], [57, 70]],
+        [[6, 19], [32, 45], [58, 71]],
+        [[7, 20], [33, 46], [59, 72]],
+        [[8, 21], [34, 47], [60, 73]],
+        [[9, 22], [35, 48], [61, 74]],
+        [[10, 23], [36, 49], [62, 75]],
+        [[11, 24], [37, 50], [63, 76]],
+        [[12, 25], [38, 51], [64, 77]]
     ];
 
     // Genera 21 pulsanti raggruppati in 7 gruppi
