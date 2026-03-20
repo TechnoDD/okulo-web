@@ -438,11 +438,11 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                         )}
                     </div>
 
-                    <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
+                    {/* <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
                         <div className="text-sm text-gray-600">
                             📊 Totale: <span className="font-semibold text-purple-600">21</span> coppie in <span className="font-semibold text-pink-600">7</span> gruppi
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
