@@ -294,7 +294,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         });
 
         const pdfBytes = await pdfDoc.save();
-        const paziente = anonymous ? (visita.patient.toString().toUpperCase()) : (visita.patientData.firstName + "-" + visita.patientData.lastName)
+        const paziente = anonymous ? (visita.patient.toString().toUpperCase()) : (visita.patientData?.firstName + "-" + visita.patientData?.lastName)
         downloadPDF(pdfBytes, `scheda_${paziente}_${new Date(visita.visitDate).toLocaleDateString("it-IT")}_${selectedPair.nomeCoppia}_${nomiGruppi[selectedPair.gruppoIndex]}.pdf`);
     }
     // Helper function to process images (invariata)
@@ -557,6 +557,7 @@ function GestioneVisite() {
                     patientData: pazienteTrovato
                 };
             });
+
             setVisite(visitsConPaziente);
         }
 
@@ -568,7 +569,7 @@ function GestioneVisite() {
         }
 
         setCurrentPage(1)
-    }, [soloPazienteSelezionato]);
+    }, [pazienti, soloPazienteSelezionato]);
 
     useEffect(() => {
         if (pazienteSelezionato && !isEditing) {
