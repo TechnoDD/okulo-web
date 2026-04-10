@@ -7,6 +7,7 @@ import {
 
 import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
+import { getLocale } from '@/paraglide/runtime'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -44,7 +45,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang={getLocale()}>
       <head>
         <HeadContent />
       </head>

@@ -1,7 +1,10 @@
+import { m } from '@/paraglide/messages';
 import { getPatients, PazienteProvider, usePaziente } from '@/providers/paziente';
 import { account, tablesDB } from '@/utils/appwrite';
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start';
+import { ChevronLeft, ChevronRight, ClipboardMinus, ClipboardPlus, Loader, Paperclip, Save, Stethoscope, UndoDot, UserPen, UserPlus } from 'lucide-react';
+import { getLocale } from '@/paraglide/runtime'
 import { useEffect, useState } from 'react';
 
 export const createPatient = createServerFn().handler(async ({ data }) => {
@@ -16,11 +19,11 @@ export const deletePatient = createServerFn().handler(async ({ data }) => {
   return await tablesDB.deleteRow(import.meta.env.VITE_APPWRITE_OKULO_DB_ID, import.meta.env.VITE_APPWRITE_PATIENTS_TABLE_ID, data.userId)
 })
 
-export const Route = createFileRoute('/_authed/patients/')({
+export const Route = createFileRoute('/_authed/patients')({
   head: () => ({
     meta: [
       {
-        title: 'ViRgo - Gestione Pazienti',
+        title: 'ViRgo',
       },
     ],
   }),
@@ -85,8 +88,7 @@ function GestionePazienti() {
       setPazienti([...refreshedPatients.rows]);
 
     } catch (error) {
-      console.error('Update failed:', error);
-      alert('Errore durante il salvataggio');
+      alert('Error while saving');
     } finally {
       setFormData(initialFormState);
       setIsEditing(false);
@@ -101,7 +103,7 @@ function GestionePazienti() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Sei sicuro di voler eliminare questo paziente?")) {
+    if (window.confirm("Are you sure you want to delete this patient?")) {
       await deletePatient({ data: { userId: id } });
       const refreshedPatients = await getPatients();
       setPazienti([...refreshedPatients.rows]);
@@ -148,12 +150,12 @@ function GestionePazienti() {
               />
               <div className="flex flex-col items-start">
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0c5baa] to-[#0c5baa] bg-clip-text text-transparent">
-                  Gestione Pazienti
+                  {m["patient.title"]()}
                 </h1>
                 <p className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#0c5baa] to-[#0c5baa] italic">
                   {pazienteSelezionato
-                    ? `Gestendo: ${pazienteSelezionato.firstName} ${pazienteSelezionato.lastName}`
-                    : "Inserisci, modifica ed elimina i pazienti"}
+                    ? `${m["patient.selected"]()}: ${pazienteSelezionato.firstName} ${pazienteSelezionato.lastName}`
+                    : m["patient.subtitle"]()}
                 </p>
               </div>
             </div>
@@ -165,7 +167,7 @@ function GestionePazienti() {
                 👤 {pazienteSelezionato.firstName} {pazienteSelezionato.lastName}
               </p>
               <p className="text-sm text-[#0c5baa]">
-                CF: {pazienteSelezionato.fiscalCode}
+                {m["patient.fiscalCode"]()}: {pazienteSelezionato.fiscalCode}
               </p>
             </div>
           )}
@@ -181,7 +183,7 @@ function GestionePazienti() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {isEditing ? "Modifica Paziente" : "Nuovo Paziente"}
+                {isEditing ? m["patient.form.edit"]() : m["patient.form.new"]()}
               </h2>
             </div>
 
@@ -190,7 +192,7 @@ function GestionePazienti() {
                 {isEditing &&
                   /* ID Paziente */
                   (<div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">ID Paziente *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{m["patient.form.id"]()} *</label>
                     <input
                       type="text"
                       name="$id"
@@ -203,7 +205,7 @@ function GestionePazienti() {
 
                 {/* Nome */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{m["patient.form.name"]()} *</label>
                   <input
                     type="text"
                     name="firstName"
@@ -215,7 +217,7 @@ function GestionePazienti() {
 
                 {/* Cognome */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Cognome *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{m["patient.form.surname"]()} *</label>
                   <input
                     type="text"
                     name="lastName"
@@ -227,7 +229,7 @@ function GestionePazienti() {
 
                 {/* Età */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Età</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{m["patient.form.age"]()}</label>
                   <input
                     type="number"
                     name="age"
@@ -241,36 +243,37 @@ function GestionePazienti() {
 
                 {/* Sesso */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Sesso *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{m["patient.form.gender"]()} *</label>
                   <select
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
                   >
-                    <option value="">Seleziona...</option>
-                    <option value="M">Maschio</option>
-                    <option value="F">Femmina</option>
-                    <option value="O">Altro</option>
+                    <option value="">{m["patient.form.selectGenderDefault"]()}...</option>
+                    <option value="M">{m["patient.form.selectM"]()}</option>
+                    <option value="F">{m["patient.form.selectF"]()}</option>
+                    <option value="O">{m["patient.form.selectO"]()}</option>
                   </select>
                 </div>
 
                 {/* Data di Nascita */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Data di Nascita</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{m["patient.form.birthDate"]()}</label>
                   <input
                     type="date"
                     name="birthDate"
                     value={formData.birthDate}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
+                    lang="fr-CA"
                     required
                   />
                 </div>
 
                 {/* Codice Fiscale */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Codice Fiscale</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{m["patient.form.fiscalCode"]()}</label>
                   <input
                     type="text"
                     name="fiscalCode"
@@ -284,11 +287,19 @@ function GestionePazienti() {
 
               {/* Patologie - Campi Dinamici con Select */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-4">Patologie</label>
+                <label className="block text-sm font-medium text-gray-700 mb-4">{m["patient.form.pathologies"]()}</label>
+                 {/*<input
+                    type="text"
+                    name="pathologies"
+                    value={formData.pathologies}
+                    onChange={handleChange}
+                    className="flex items-end gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200"
+                  />*/}
                 <div className="space-y-3 max-w-2xl">
                   {formData.pathologies && formData.pathologies.map((pathology, index) => (
                     <div key={index} className="flex items-end gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                      <select
+                      {/*<select*/}
+                      <input
                         value={pathology || ''}
                         onChange={(e) => {
                           const newPathologies = [...formData.pathologies];
@@ -296,13 +307,14 @@ function GestionePazienti() {
                           setFormData({ ...formData, pathologies: newPathologies });
                         }}
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] transition-all duration-200"
-                      >
-                        <option value="">Seleziona una patologia...</option>
-                        <option value="Ipertensione">Ipertensione</option>
-                        <option value="Diabete tipo 2">Diabete tipo 2</option>
-                        <option value="Allergia farmaci">Allergia farmaci</option>
-                        <option value="Asma bronchiale">Asma bronchiale</option>
-                      </select>
+                      >{/*
+                        <option value="">{m["patient.form.selectPathologiesDefaut"]()}...</option>
+                        <option value="High blood pressure">High blood pressure</option>
+                        <option value="Type 2 diabetes">Type 2 diabetes</option>
+                        <option value="Drug allergy">Drug allergy</option>
+                        <option value="Bronchial asthma">Bronchial asthma</option>*/}
+                      </input>
+
                       <button
                         type="button"
                         onClick={() => {
@@ -311,13 +323,13 @@ function GestionePazienti() {
                         }}
                         className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-all duration-200 flex items-center h-10"
                       >
-                        Rimuovi
+                        <ClipboardMinus />
                       </button>
                     </div>
                   ))}
                   {(!formData.pathologies || formData.pathologies.length === 0) && (
                     <p className="text-gray-500 text-sm italic py-3 px-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                      Nessuna patologia inserita
+                      {m["patient.form.pathologiesEmpty"]()}
                     </p>
                   )}
                 </div>
@@ -329,11 +341,9 @@ function GestionePazienti() {
                   }}
                   className="mt-3 flex items-center gap-2 px-4 py-2 bg-[#0c5baa] hover:bg-[#0a4a8a] text-white text-sm font-medium rounded-xl transition-all duration-200"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Aggiungi Patologia
+                  <ClipboardPlus />
                 </button>
+                
               </div>
 
               {/* Pulsanti */}
@@ -343,7 +353,7 @@ function GestionePazienti() {
                   disabled={loading}
                   className="flex-1 bg-gradient-to-r from-[#0c5baa] to-[#0a4a8a] text-white py-3 px-6 rounded-xl font-semibold shadow-lg hover:from-[#0a4a8a] hover:to-[#08407a] focus:ring-4 focus:ring-[#0c5baa]/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                  {loading ? 'Salvando...' : (isEditing ? "Aggiorna" : "Aggiungi")}
+                  {loading ? <Loader /> : (isEditing ? <Save /> : <UserPlus />)}
                 </button>
                 {isEditing && (
                   <button
@@ -351,7 +361,7 @@ function GestionePazienti() {
                     onClick={handleCancelEdit}
                     className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50"
                   >
-                    Annulla
+                    <UndoDot />
                   </button>
                 )}
               </div>
@@ -367,7 +377,7 @@ function GestionePazienti() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Elenco Pazienti</h2>
+                <h2 className="text-2xl font-bold text-gray-900">{m["patient.list.title"]()}</h2>
               </div>
               <div className="text-sm font-semibold text-gray-700 bg-[#0c5baa]/10 px-3 py-1 rounded-full">
                 {currentPatients.length} / {pazienti.length}
@@ -381,7 +391,7 @@ function GestionePazienti() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <input type="text" placeholder="Cerca per nome, cognome o codice fiscale..."
+                <input type="text" placeholder={m["patient.list.search"]()}
                   value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0c5baa] focus:border-[#0c5baa] bg-gray-50" />
               </div>
@@ -391,11 +401,11 @@ function GestionePazienti() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50">
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Cognome</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Data di nascita</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Cod. Fiscale</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Azioni</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{m["patient.list.name"]()}</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{m["patient.list.surname"]()}</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{m["patient.list.birthDate"]()}</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{m["patient.list.fiscalCode"]()}</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">&nbsp;</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -408,15 +418,15 @@ function GestionePazienti() {
                       <td className="px-6 py-4 space-x-2">
                         <button onClick={() => handleEdit(paziente)}
                           className="px-3 py-1 bg-[#0c5baa]/10 text-[#0c5baa] text-xs rounded-md hover:bg-[#0c5baa]/20">
-                          Modifica
+                          <UserPen />
                         </button>
                         <button onClick={() => navigaConPaziente(paziente, "/visits")}
                           className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-md hover:bg-emerald-200">
-                          Visite
+                          <Stethoscope />
                         </button>
                         <button onClick={() => navigaConPaziente(paziente, "/documents")}
                           className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-md hover:bg-purple-200">
-                          Documenti
+                          <Paperclip />
                         </button>
                       </td>
                     </tr>
@@ -427,27 +437,27 @@ function GestionePazienti() {
 
             {/* 🔍 CONTROLLI PAGINAZIONE */}
             {filteredPazienti.length > patientsPerPage && (
-              <div className="mt-6 flex items-center justify-between">
-                <div className="text-sm text-gray-700">
+              <div className="mt-6 flex items-center justify-end">
+                {/* <div className="text-sm text-gray-700">
                   Visualizzati {indexOfFirstPatient + 1}-{Math.min(indexOfLastPatient, filteredPazienti.length)} di {filteredPazienti.length} pazienti
-                </div>
+                </div> */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
                     className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Precedente
+                    <ChevronLeft />
                   </button>
                   <span className="px-3 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-lg">
-                    Pagina {currentPage} di {totalPages}
+                    {m["patient.list.pages"]({ currentPage, totalPages })}
                   </span>
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
                     className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Successiva
+                    <ChevronRight />
                   </button>
                 </div>
               </div>

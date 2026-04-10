@@ -1,5 +1,8 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Outlet, Link } from '@tanstack/react-router'
+
+import { m } from '@/paraglide/messages'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export const Route = createFileRoute('/_authed')({
   beforeLoad: async ({ context }) => {
@@ -45,7 +48,7 @@ function AuthenticatedLayout() {
                   to="/patients"
                   className="px-6 py-3 bg-gradient-to-r from-[#0c5baa] to-[#0a4a8a] text-white font-semibold rounded-xl shadow-lg hover:from-[#0a4a8a] hover:to-[#08407a] focus:ring-4 focus:ring-[#0c5baa]/20 transition-all duration-200"
                 >
-                  Pazienti
+                  {m['nav.patients']()}
                 </Link>
               </li>
               <li>
@@ -53,7 +56,7 @@ function AuthenticatedLayout() {
                   to="/visits"
                   className="px-6 py-3 bg-gradient-to-r from-[#48b671] to-[#3da861] text-white font-semibold rounded-xl shadow-lg hover:from-[#3da861] hover:to-[#329c51] focus:ring-4 focus:ring-[#48b671]/20 transition-all duration-200"
                 >
-                  Visite
+                  {m['nav.visits']()}
                 </Link>
               </li>
               <li>
@@ -61,7 +64,7 @@ function AuthenticatedLayout() {
                   to="/documents"
                   className="px-6 py-3 bg-gradient-to-r from-[#9e427a] to-[#8e3a6a] text-white font-semibold rounded-xl shadow-lg hover:from-[#8e3a6a] hover:to-[#7e325a] focus:ring-4 focus:ring-[#9e427a]/20 transition-all duration-200"
                 >
-                  Documenti
+                  {m['nav.attachments']()}
                 </Link>
               </li>
             </ul>
@@ -72,7 +75,7 @@ function AuthenticatedLayout() {
               <button
                 onClick={handleDownloadPDF}
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:from-indigo-600 hover:to-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 text-sm"
-                aria-label="Scarica documento PDF"
+                aria-label={m["nav.download"]()}
               >
                 <svg
                   className="w-5 h-5"
@@ -84,13 +87,15 @@ function AuthenticatedLayout() {
                 Info
               </button>
 
+              {/* <LanguageSwitcher /> */}
+
               {/* Logo Virtual Factory */}
               <a
                 href="https://www.virtualfactory.it/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-shrink-0 hover:scale-105 transition-transform duration-200"
-                aria-label="Virtual Factory - Sito principale (nuova finestra)"
+                aria-label="Virtual Factory"
               >
                 <img
                   src="/VFLogo.png"

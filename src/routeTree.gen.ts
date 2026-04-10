@@ -10,16 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
 import { Route as DemoStoreRouteImport } from './routes/demo/store'
 import { Route as DemoDbChatApiRouteImport } from './routes/demo/db-chat-api'
 import { Route as DemoDbChatRouteImport } from './routes/demo/db-chat'
+import { Route as AuthedVisitsRouteImport } from './routes/_authed/visits'
+import { Route as AuthedPatientsRouteImport } from './routes/_authed/patients'
+import { Route as AuthedDocumentsRouteImport } from './routes/_authed/documents'
 import { Route as AuthedVisitsIndexRouteImport } from './routes/_authed/visits.index'
-import { Route as AuthedPatientsIndexRouteImport } from './routes/_authed/patients.index'
-import { Route as AuthedDocumentsIndexRouteImport } from './routes/_authed/documents.index'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
@@ -36,7 +37,7 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedRoute = AuthedRouteImport.update({
+const AuthedRouteRoute = AuthedRouteRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -70,20 +71,25 @@ const DemoDbChatRoute = DemoDbChatRouteImport.update({
   path: '/demo/db-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedVisitsRoute = AuthedVisitsRouteImport.update({
+  id: '/visits',
+  path: '/visits',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedPatientsRoute = AuthedPatientsRouteImport.update({
+  id: '/patients',
+  path: '/patients',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedDocumentsRoute = AuthedDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
 const AuthedVisitsIndexRoute = AuthedVisitsIndexRouteImport.update({
-  id: '/visits/',
-  path: '/visits/',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedPatientsIndexRoute = AuthedPatientsIndexRouteImport.update({
-  id: '/patients/',
-  path: '/patients/',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedDocumentsIndexRoute = AuthedDocumentsIndexRouteImport.update({
-  id: '/documents/',
-  path: '/documents/',
-  getParentRoute: () => AuthedRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthedVisitsRoute,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
@@ -139,6 +145,9 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/documents': typeof AuthedDocumentsRoute
+  '/patients': typeof AuthedPatientsRoute
+  '/visits': typeof AuthedVisitsRouteWithChildren
   '/demo/db-chat': typeof DemoDbChatRoute
   '/demo/db-chat-api': typeof DemoDbChatApiRoute
   '/demo/store': typeof DemoStoreRoute
@@ -150,8 +159,6 @@ export interface FileRoutesByFullPath {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/documents/': typeof AuthedDocumentsIndexRoute
-  '/patients/': typeof AuthedPatientsIndexRoute
   '/visits/': typeof AuthedVisitsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
@@ -161,6 +168,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/documents': typeof AuthedDocumentsRoute
+  '/patients': typeof AuthedPatientsRoute
   '/demo/db-chat': typeof DemoDbChatRoute
   '/demo/db-chat-api': typeof DemoDbChatApiRoute
   '/demo/store': typeof DemoStoreRoute
@@ -172,8 +181,6 @@ export interface FileRoutesByTo {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/documents': typeof AuthedDocumentsIndexRoute
-  '/patients': typeof AuthedPatientsIndexRoute
   '/visits': typeof AuthedVisitsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
@@ -183,8 +190,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authed': typeof AuthedRouteWithChildren
+  '/_authed': typeof AuthedRouteRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authed/documents': typeof AuthedDocumentsRoute
+  '/_authed/patients': typeof AuthedPatientsRoute
+  '/_authed/visits': typeof AuthedVisitsRouteWithChildren
   '/demo/db-chat': typeof DemoDbChatRoute
   '/demo/db-chat-api': typeof DemoDbChatApiRoute
   '/demo/store': typeof DemoStoreRoute
@@ -196,8 +206,6 @@ export interface FileRoutesById {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/_authed/documents/': typeof AuthedDocumentsIndexRoute
-  '/_authed/patients/': typeof AuthedPatientsIndexRoute
   '/_authed/visits/': typeof AuthedVisitsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
@@ -209,6 +217,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/documents'
+    | '/patients'
+    | '/visits'
     | '/demo/db-chat'
     | '/demo/db-chat-api'
     | '/demo/store'
@@ -220,8 +231,6 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/documents/'
-    | '/patients/'
     | '/visits/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
@@ -231,6 +240,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/documents'
+    | '/patients'
     | '/demo/db-chat'
     | '/demo/db-chat-api'
     | '/demo/store'
@@ -242,8 +253,6 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/documents'
-    | '/patients'
     | '/visits'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
@@ -254,6 +263,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/login'
+    | '/_authed/documents'
+    | '/_authed/patients'
+    | '/_authed/visits'
     | '/demo/db-chat'
     | '/demo/db-chat-api'
     | '/demo/store'
@@ -265,8 +277,6 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/_authed/documents/'
-    | '/_authed/patients/'
     | '/_authed/visits/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
@@ -276,7 +286,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthedRoute: typeof AuthedRouteWithChildren
+  AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   DemoDbChatRoute: typeof DemoDbChatRoute
   DemoDbChatApiRoute: typeof DemoDbChatApiRoute
@@ -308,7 +318,7 @@ declare module '@tanstack/react-router' {
       id: '/_authed'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthedRouteImport
+      preLoaderRoute: typeof AuthedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -353,26 +363,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoDbChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/visits': {
+      id: '/_authed/visits'
+      path: '/visits'
+      fullPath: '/visits'
+      preLoaderRoute: typeof AuthedVisitsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/patients': {
+      id: '/_authed/patients'
+      path: '/patients'
+      fullPath: '/patients'
+      preLoaderRoute: typeof AuthedPatientsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/documents': {
+      id: '/_authed/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AuthedDocumentsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/_authed/visits/': {
       id: '/_authed/visits/'
-      path: '/visits'
+      path: '/'
       fullPath: '/visits/'
       preLoaderRoute: typeof AuthedVisitsIndexRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/patients/': {
-      id: '/_authed/patients/'
-      path: '/patients'
-      fullPath: '/patients/'
-      preLoaderRoute: typeof AuthedPatientsIndexRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/documents/': {
-      id: '/_authed/documents/'
-      path: '/documents'
-      fullPath: '/documents/'
-      preLoaderRoute: typeof AuthedDocumentsIndexRouteImport
-      parentRoute: typeof AuthedRoute
+      parentRoute: typeof AuthedVisitsRoute
     }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
@@ -447,24 +464,37 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthedRouteChildren {
-  AuthedDocumentsIndexRoute: typeof AuthedDocumentsIndexRoute
-  AuthedPatientsIndexRoute: typeof AuthedPatientsIndexRoute
+interface AuthedVisitsRouteChildren {
   AuthedVisitsIndexRoute: typeof AuthedVisitsIndexRoute
 }
 
-const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedDocumentsIndexRoute: AuthedDocumentsIndexRoute,
-  AuthedPatientsIndexRoute: AuthedPatientsIndexRoute,
+const AuthedVisitsRouteChildren: AuthedVisitsRouteChildren = {
   AuthedVisitsIndexRoute: AuthedVisitsIndexRoute,
 }
 
-const AuthedRouteWithChildren =
-  AuthedRoute._addFileChildren(AuthedRouteChildren)
+const AuthedVisitsRouteWithChildren = AuthedVisitsRoute._addFileChildren(
+  AuthedVisitsRouteChildren,
+)
+
+interface AuthedRouteRouteChildren {
+  AuthedDocumentsRoute: typeof AuthedDocumentsRoute
+  AuthedPatientsRoute: typeof AuthedPatientsRoute
+  AuthedVisitsRoute: typeof AuthedVisitsRouteWithChildren
+}
+
+const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
+  AuthedDocumentsRoute: AuthedDocumentsRoute,
+  AuthedPatientsRoute: AuthedPatientsRoute,
+  AuthedVisitsRoute: AuthedVisitsRouteWithChildren,
+}
+
+const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
+  AuthedRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthedRoute: AuthedRouteWithChildren,
+  AuthedRouteRoute: AuthedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   DemoDbChatRoute: DemoDbChatRoute,
   DemoDbChatApiRoute: DemoDbChatApiRoute,

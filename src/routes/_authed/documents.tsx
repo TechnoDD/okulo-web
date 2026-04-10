@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { PazienteProvider, usePaziente } from '@/providers/paziente';
 import { createServerFn } from '@tanstack/react-start';
+import { ChevronLeft, ChevronRight, ClipboardMinus, ClipboardPlus, Trash2, Loader, Paperclip, Save, Stethoscope, UndoDot, UserPen, UserPlus, ArrowDownToLine } from 'lucide-react';
 import { createFileRoute, useRouterState } from '@tanstack/react-router'
 import { tablesDB, storage, ID, Query } from '@/utils/appwrite';
+import { m } from '@/paraglide/messages';
 
 export const getAttachments = createServerFn().handler(async ({ data }) => {
   const { patientId } = data;
@@ -42,7 +44,7 @@ export const deleteAttachment = createServerFn().handler(async ({ data }) => {
 
     return { success: true };
   } catch (error) {
-    console.error('Errore eliminazione:', error);
+
     return { success: false, error: error.message };
   }
 });
@@ -51,10 +53,10 @@ export const deleteAttachment = createServerFn().handler(async ({ data }) => {
 export const getDownloadUrl = createServerFn().handler(async ({ data }) => {
   const { fileId } = data;
 
-  console.log(fileId)
+
 
   if (!fileId) {
-    throw new Error('File ID mancante');
+    throw new Error('Missing file ID');
   }
 
   // Genera URL di download valido per 1 ora
@@ -63,16 +65,15 @@ export const getDownloadUrl = createServerFn().handler(async ({ data }) => {
     fileId
   );
 
-  console.log(downloadUrl)
 
   return { downloadUrl };
 });
 
-export const Route = createFileRoute('/_authed/documents/')({
+export const Route = createFileRoute('/_authed/documents')({
   head: () => ({
     meta: [
       {
-        title: 'ViRgo - Gestione Documenti',
+        title: 'ViRgo',
       },
     ],
   }),
@@ -179,7 +180,7 @@ function GestioneDocumenti() {
     e.preventDefault();
 
     if (!formData.pazienteId || !formData.descrizione || !selectedFile) {
-      alert("Tutti i campi sono obbligatori");
+      alert(m["document.form.error"]());
       return;
     }
 
@@ -207,11 +208,11 @@ function GestioneDocumenti() {
       // 3. Refresh lista
       await fetchAttachments();
 
-      alert('✅ Documento caricato e collegato correttamente!');
+      alert(`✅ ${m["document.form.success"]()}`);
 
     } catch (error) {
-      console.error('Errore:', error);
-      alert('❌ Errore durante il caricamento');
+
+      alert(`❌ ${m["document.form.loadingError"]()}`);
     } finally {
       setFormData(initialFormState);
       setSelectedFile(null);
@@ -229,7 +230,7 @@ function GestioneDocumenti() {
 
   // NUOVA FUNZIONE: Gestisce eliminazione documento
   const handleDelete = async (rowId: string, fileId: string | undefined) => {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare questo documento? L'operazione è irreversibile.")) {
+    if (!confirm(`⚠️ ${m["document.form.loadingError"]()}`)) {
       return;
     }
 
@@ -243,10 +244,9 @@ function GestioneDocumenti() {
       // Refresh lista documenti
       await fetchAttachments();
 
-      alert('✅ Documento eliminato correttamente!');
+      alert(`✅ ${m["document.form.success"]()}`);
     } catch (error) {
-      console.error('Errore eliminazione:', error);
-      alert("❌ Errore durante l'eliminazione");
+      alert(`❌ ${m["document.form.error"]()}`);
     } finally {
       setDeleting(prev => ({ ...prev, [rowId]: false }));
     }
@@ -255,7 +255,7 @@ function GestioneDocumenti() {
   // NUOVA FUNZIONE: Gestisce download documento
   const handleDownload = async (doc: any) => {
     if (!doc.fileId || doc.status !== 'uploaded') {
-      alert('❌ Documento non disponibile per il download');
+      alert(`❌ ${m["document.form.downloadError"]()}`);
       return;
     }
 
@@ -274,8 +274,7 @@ function GestioneDocumenti() {
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error('Errore download:', error);
-      alert('❌ Errore durante il download');
+      alert(`❌ ${m["document.form.downloadingError"]()}`);
     }
   };
 
@@ -298,7 +297,7 @@ function GestioneDocumenti() {
 
   const getNomePaziente = (pazienteId: any) => {
     const p = pazienti.find(p => p.$id === pazienteId);
-    return p ? `${p.firstName} ${p.lastName}` : `Paziente #${pazienteId}`;
+    return p ? `${p.firstName} ${p.lastName}` : `${m["document.patientName"]()} #${pazienteId}`;
   };
 
   const getStatusIcon = (status: string) => {
@@ -324,12 +323,12 @@ function GestioneDocumenti() {
               />
               <div className="flex flex-col items-start">
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-[#9e427a] to-[#9e427a] bg-clip-text text-transparent">
-                  Gestione Documenti
+                  {m["document.title"]()}
                 </h1>
                 <p className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#9e427a] to-[#9e427a] italic">
                   {pazienteSelezionato
-                    ? `Gestendo: ${pazienteSelezionato.firstName} ${pazienteSelezionato.lastName}`
-                    : "Inserisci, modifica ed elimina i documenti"}
+                    ? `${m["document.selected"]()}: ${pazienteSelezionato.firstName} ${pazienteSelezionato.lastName}`
+                    : m["document.subtitle"]()}
                 </p>
               </div>
             </div>
@@ -341,7 +340,7 @@ function GestioneDocumenti() {
                 👤 {pazienteSelezionato.firstName} {pazienteSelezionato.lastName}
               </p>
               <p className="text-sm" style={{ color: '#9e427a' }}>
-                CF: {pazienteSelezionato.fiscalCode}
+                ${m["document.fiscalCode"]()}: {pazienteSelezionato.fiscalCode}
               </p>
             </div>
           )}
@@ -354,7 +353,7 @@ function GestioneDocumenti() {
                 : "bg-[#e6e6f0] text-[#9e427a] hover:bg-[#d6d6e8] shadow-sm"
                 }`}
             >
-              {soloPazienteSelezionato ? "👁️ Mostra tutti i documenti" : "✅ Solo documenti di questo paziente"}
+              {soloPazienteSelezionato ? "👁️ Show all documents" : "✅ Documents for this patient only"}
             </button>
           )}
         </div>
@@ -362,11 +361,11 @@ function GestioneDocumenti() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* FORM */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Nuovo Documento</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">New Document</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Paziente *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Patient *</label>
                   <select
                     name="pazienteId"
                     value={formData.pazienteId}
@@ -375,7 +374,7 @@ function GestioneDocumenti() {
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500"
                     disabled={loading}
                   >
-                    <option value="">Seleziona...</option>
+                    <option value="">{m["document.form.selectPatientDefault"]()}</option>
                     {pazienti.map(p => (
                       <option key={p.$id} value={p.$id}>
                         {p.firstName} {p.lastName} - #{p.$id.toString().toUpperCase()}
@@ -401,7 +400,7 @@ function GestioneDocumenti() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Descrizione *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
                 <textarea
                   name="descrizione"
                   value={formData.descrizione}
@@ -409,7 +408,7 @@ function GestioneDocumenti() {
                   rows={3}
                   disabled={loading}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 resize-vertical"
-                  placeholder="Es. Referto cardiologico, analisi del sangue..."
+                  placeholder="E.g., cardiology report, blood tests..."
                 />
               </div>
               <button
@@ -420,10 +419,10 @@ function GestioneDocumenti() {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Caricamento...</span>
+                    <span>Loading...</span>
                   </>
                 ) : (
-                  '🚀 Carica Documento'
+                  '🚀 Load Document'
                 )}
               </button>
             </form>
@@ -432,7 +431,7 @@ function GestioneDocumenti() {
           {/* ELENCO CON PAGINAZIONE */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Documenti</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Documents</h2>
               <span className="text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
                 {currentDocumenti.length} / {documenti.length}
               </span>
@@ -440,7 +439,7 @@ function GestioneDocumenti() {
 
             <input
               type="text"
-              placeholder="Cerca documenti..."
+              placeholder="Search documents..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl mb-6 focus:ring-2 focus:ring-indigo-500"
@@ -448,7 +447,7 @@ function GestioneDocumenti() {
 
             {filteredDocumenti.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
-                Nessun documento trovato
+                No documents found
               </div>
             ) : (
               <>
@@ -456,10 +455,10 @@ function GestioneDocumenti() {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gray-50">
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paziente</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrizione</th>
-                        <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Stato</th>
-                        <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-20">Azioni</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Status</th>
+                        <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-20">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -495,14 +494,17 @@ function GestioneDocumenti() {
                                 }}
                                 disabled={!doc.fileId || doc.status !== 'uploaded'}
                                 className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                                title="Scarica documento"
+                                title="Download document"
                               >
                                 {deleting[doc.$id] ? (
                                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-700"></div>
                                 ) : (
-                                  '⬇️ Scarica'
+                                  ''
                                 )}
+                                <ArrowDownToLine />
                               </button>
+
+
 
                               <button
                                 onClick={(e) => {
@@ -511,16 +513,17 @@ function GestioneDocumenti() {
                                 }}
                                 disabled={deleting[doc.$id] || doc.status === 'pending_upload'}
                                 className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                                title="Elimina documento"
+                                title="Delete document"
                               >
                                 {deleting[doc.$id] ? (
                                   <>
                                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-700"></div>
-                                    <span>Elim.</span>
+                                    <span>Del.</span>
                                   </>
                                 ) : (
-                                  '🗑️ Elimina'
+                                  ''
                                 )}
+                                <Trash2 />
                               </button>
                             </div>
                           </td>
@@ -534,7 +537,7 @@ function GestioneDocumenti() {
                 {filteredDocumenti.length > docsPerPage && (
                   <div className="mt-6 flex items-center justify-between">
                     <div className="text-sm text-gray-700">
-                      Visualizzati {indexOfFirstDoc + 1}-{Math.min(indexOfLastDoc, filteredDocumenti.length)} di {filteredDocumenti.length} documenti
+                      Viewed {indexOfFirstDoc + 1}-{Math.min(indexOfLastDoc, filteredDocumenti.length)} di {filteredDocumenti.length} documents
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -542,17 +545,17 @@ function GestioneDocumenti() {
                         disabled={currentPage === 1}
                         className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
-                        Precedente
+                        Previous
                       </button>
                       <span className="px-3 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-lg">
-                        Pagina {currentPage} di {totalPages}
+                        Page {currentPage} of {totalPages}
                       </span>
                       <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
                         className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
-                        Successiva
+                        Next
                       </button>
                     </div>
                   </div>

@@ -28,7 +28,7 @@
     "@tanstack/router-plugin": "^1.132.0",
     "@tanstack/store": "^0.7.0",
     "appwrite": "^21.5.0",
-    "lucide-react": "^0.544.0",
+    "lucide-react": "^1.7.0",
     "nitro": "latest",
     "pdf-lib": "^1.17.1",
     "react": "^19.2.0",
@@ -51,6 +51,7 @@
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
     "vitest": "^3.0.5",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.1.0",
+    "@inlang/paraglide-js": "^2.15.1"
   }
 }

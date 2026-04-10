@@ -1,6 +1,12 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "src/routes/_authed/visits.index.tsx.old"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "src/routes/_authed/visits.index.tsx.old",
+    "src/routes/_authed/patients.tsx"
+  ],
   "compilerOptions": {
+    "allowJs": true,
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "ESNext",
