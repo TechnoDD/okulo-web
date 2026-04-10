@@ -20,7 +20,6 @@ import { Route as DemoDbChatRouteImport } from './routes/demo/db-chat'
 import { Route as AuthedVisitsRouteImport } from './routes/_authed/visits'
 import { Route as AuthedPatientsRouteImport } from './routes/_authed/patients'
 import { Route as AuthedDocumentsRouteImport } from './routes/_authed/documents'
-import { Route as AuthedVisitsIndexRouteImport } from './routes/_authed/visits.index'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
@@ -86,11 +85,6 @@ const AuthedDocumentsRoute = AuthedDocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
-const AuthedVisitsIndexRoute = AuthedVisitsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthedVisitsRoute,
-} as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
   path: '/demo/start/server-funcs',
@@ -147,7 +141,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/documents': typeof AuthedDocumentsRoute
   '/patients': typeof AuthedPatientsRoute
-  '/visits': typeof AuthedVisitsRouteWithChildren
+  '/visits': typeof AuthedVisitsRoute
   '/demo/db-chat': typeof DemoDbChatRoute
   '/demo/db-chat-api': typeof DemoDbChatApiRoute
   '/demo/store': typeof DemoStoreRoute
@@ -159,7 +153,6 @@ export interface FileRoutesByFullPath {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/visits/': typeof AuthedVisitsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -170,6 +163,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/documents': typeof AuthedDocumentsRoute
   '/patients': typeof AuthedPatientsRoute
+  '/visits': typeof AuthedVisitsRoute
   '/demo/db-chat': typeof DemoDbChatRoute
   '/demo/db-chat-api': typeof DemoDbChatApiRoute
   '/demo/store': typeof DemoStoreRoute
@@ -181,7 +175,6 @@ export interface FileRoutesByTo {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/visits': typeof AuthedVisitsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -194,7 +187,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authed/documents': typeof AuthedDocumentsRoute
   '/_authed/patients': typeof AuthedPatientsRoute
-  '/_authed/visits': typeof AuthedVisitsRouteWithChildren
+  '/_authed/visits': typeof AuthedVisitsRoute
   '/demo/db-chat': typeof DemoDbChatRoute
   '/demo/db-chat-api': typeof DemoDbChatApiRoute
   '/demo/store': typeof DemoStoreRoute
@@ -206,7 +199,6 @@ export interface FileRoutesById {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/_authed/visits/': typeof AuthedVisitsIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -231,7 +223,6 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/visits/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -242,6 +233,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/documents'
     | '/patients'
+    | '/visits'
     | '/demo/db-chat'
     | '/demo/db-chat-api'
     | '/demo/store'
@@ -253,7 +245,6 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/visits'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -277,7 +268,6 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/_authed/visits/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -384,13 +374,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDocumentsRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
-    '/_authed/visits/': {
-      id: '/_authed/visits/'
-      path: '/'
-      fullPath: '/visits/'
-      preLoaderRoute: typeof AuthedVisitsIndexRouteImport
-      parentRoute: typeof AuthedVisitsRoute
-    }
     '/demo/start/server-funcs': {
       id: '/demo/start/server-funcs'
       path: '/demo/start/server-funcs'
@@ -464,28 +447,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthedVisitsRouteChildren {
-  AuthedVisitsIndexRoute: typeof AuthedVisitsIndexRoute
-}
-
-const AuthedVisitsRouteChildren: AuthedVisitsRouteChildren = {
-  AuthedVisitsIndexRoute: AuthedVisitsIndexRoute,
-}
-
-const AuthedVisitsRouteWithChildren = AuthedVisitsRoute._addFileChildren(
-  AuthedVisitsRouteChildren,
-)
-
 interface AuthedRouteRouteChildren {
   AuthedDocumentsRoute: typeof AuthedDocumentsRoute
   AuthedPatientsRoute: typeof AuthedPatientsRoute
-  AuthedVisitsRoute: typeof AuthedVisitsRouteWithChildren
+  AuthedVisitsRoute: typeof AuthedVisitsRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedDocumentsRoute: AuthedDocumentsRoute,
   AuthedPatientsRoute: AuthedPatientsRoute,
-  AuthedVisitsRoute: AuthedVisitsRouteWithChildren,
+  AuthedVisitsRoute: AuthedVisitsRoute,
 }
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
