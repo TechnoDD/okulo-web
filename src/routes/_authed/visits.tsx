@@ -1,7 +1,7 @@
 import { PazienteProvider, usePaziente } from '@/providers/paziente';
 import { storage, tablesDB } from '@/utils/appwrite';
 import { createFileRoute, useRouterState } from '@tanstack/react-router'
-import { ChevronLeft, ChevronRight, ClipboardMinus, ClipboardPlus, Loader, Image as SvgImage, Paperclip, Save, Stethoscope, UndoDot, UserPen, UserPlus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ClipboardMinus, ClipboardPlus, Loader, Image as SvgImage, CircleX , Paperclip, Save, Stethoscope, UndoDot, UserPen, UserPlus } from 'lucide-react';
 import { createServerFn } from '@tanstack/react-start';
 import { Query } from 'appwrite';
 import { useEffect, useState } from 'react';
@@ -882,6 +882,10 @@ function GestioneVisite() {
                                                             className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-lg hover:bg-emerald-200" title="Modify">
                                                             <UserPen />
                                                         </button>
+                                                        <button onClick={() => handleDelete(visita.$id)}
+                                                        className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-lg hover:bg-red-200" title="Delete visit">
+                                                       <CircleX />
+                                                    </button>                                                        
                                                     </td>
                                                 </tr>
                                             ))}
