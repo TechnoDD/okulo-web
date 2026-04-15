@@ -615,7 +615,7 @@ function GestioneVisite() {
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Elimina questa visita?")) {
+        if (window.confirm("Delete this visit?")) {
             await deleteVisit({ data: { $id: id } });
             setVisite(prev => prev.filter(v => v.$id !== id));
         }
@@ -879,11 +879,11 @@ function GestioneVisite() {
                                                         </button>
 
                                                         <button onClick={() => handleEdit(visita)}
-                                                            className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-lg hover:bg-emerald-200" title="Modify">
+                                                            className="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-lg hover:bg-emerald-200 flex items-center space-x-1" title="Modify">
                                                             <UserPen />
                                                         </button>
                                                         <button onClick={() => handleDelete(visita.$id)}
-                                                        className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-lg hover:bg-red-200" title="Delete visit">
+                                                        className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-lg hover:bg-red-200 flex items-center space-x-1" title="Delete visit">
                                                        <CircleX />
                                                     </button>                                                        
                                                     </td>
