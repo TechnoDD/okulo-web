@@ -128,13 +128,13 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
         [[12, 25], [38, 51], [64, 77]]
     ];
 
-    // Genera 21 pulsanti raggruppati in 7 gruppi
+    // Mostra solo la prima coppia del primo gruppo (2 immagini totali)
     const gruppiPulsanti = [];
-    const numGruppi = nomiGruppi.length;
+    const numGruppi = 1;
 
     for (let gruppoIndex = 0; gruppoIndex < numGruppi; gruppoIndex++) {
         const pulsantiGruppo = [];
-        const coppieGruppo = organizzazioneCoppie[gruppoIndex];
+        const coppieGruppo = organizzazioneCoppie[gruppoIndex].slice(0, 1);
 
         coppieGruppo.forEach((coppiaIndici, pulsanteIndex) => {
             const [img1Index, img2Index] = coppiaIndici;
@@ -389,34 +389,33 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
                                             </div>
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-900">{gruppo.nome}</h3>
-                                                <p className="text-sm text-gray-600 font-medium mt-1">{gruppo.pulsanti.length} coppie</p>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div className="flex justify-center">
                                             {gruppo.pulsanti.map((pulsante) => (
-                                                <div key={pulsante.id} className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-4 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden border-2 border-gray-100 hover:border-purple-300 h-fit" onClick={() => handlePulsanteClick(pulsante)}>
+                                                <div key={pulsante.id} className="group relative w-full max-w-5xl bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer overflow-hidden border-2 border-gray-100 hover:border-purple-300" onClick={() => handlePulsanteClick(pulsante)}>
 
                                                     {/* ✅ ANTEPRIMA IMG1 E IMG2 - LAYOUT ORIZZONTALE */}
-                                                    <div className="w-full h-32 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-xl overflow-hidden flex items-center justify-center mb-3 mx-auto">
+                                                    <div className="w-full bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-xl overflow-hidden flex items-center gap-4 mb-4 mx-auto p-3">
                                                         <img
                                                             src={pulsante.img2Src}
                                                             alt={`${pulsante.alt} - 1`}
-                                                            className="w-1/2 h-full object-cover"
+                                                            className="w-1/2 h-auto object-contain rounded-lg"
                                                             loading="lazy"
                                                         />
-                                                        <div className="w-px h-20 bg-gradient-to-b from-white/50 to-transparent mx-2"></div>
+                                                        <div className="w-px self-stretch bg-gradient-to-b from-transparent via-white/50 to-transparent"></div>
                                                         <img
                                                             src={pulsante.img1Src}
                                                             alt={`${pulsante.alt} - 2`}
-                                                            className="w-1/2 h-full object-cover"
+                                                            className="w-1/2 h-auto object-contain rounded-lg"
                                                             loading="lazy"
                                                         />
                                                     </div>
 
                                                     <div className="text-center mt-3">
-                                                        <p className="text-sm font-bold text-gray-800">{pulsante.nomeCoppia}</p>
-                                                        <p className="text-xs text-gray-500">[{pulsante.img1Index + 1}-{pulsante.img2Index + 1}]</p>
+                                                        <p className="text-base font-bold text-gray-800">{pulsante.nomeCoppia}</p>
+                                                        <p className="text-sm text-gray-500">[{pulsante.img1Index + 1}-{pulsante.img2Index + 1}]</p>
                                                     </div>
 
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
