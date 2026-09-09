@@ -113,7 +113,7 @@ function ImmaginiModale({ isOpen, onClose, visita }) {
 
     // ORGANIZZAZIONE COPPIE PER GRUPPO
     const organizzazioneCoppie = [
-        [[0, 13], [26, 39], [52, 65]],
+        [[0, 1], [26, 39], [52, 65]],
         [[1, 14], [27, 40], [53, 66]],
         [[2, 15], [28, 41], [54, 67]],
         [[3, 16], [29, 42], [55, 68]],
